@@ -37,6 +37,8 @@ const ProductEdit = () => {
     const [totalStock, setTotalStock] = useState(0);
     const [product, setProduct] = useState([]);
     const [input, setInput] = useState({});
+    const [attributeShopQuantities, setAttributeShopQuantities] = useState({});
+    const [multiValue, setMultiValue] = useState();
 
     const handleDescriptionChange = (value) => {
         setInput((prevState) => ({
@@ -452,7 +454,13 @@ const ProductEdit = () => {
         setTotalStock(total);
     }, [selectedShops, quantities]);
 
-
+    const handleAttributeShopChange = (row_no, e) => {
+        console.log(row_no);
+        setAttributeShopQuantities({
+            ...attributeShopQuantities,
+            [row_no]: e
+        });
+    };
 
     // Sanjib - 
     let attribute_obj = {}
@@ -781,6 +789,8 @@ const ProductEdit = () => {
 
                                             {
                                                 attributeFiled.map((value, index) => {
+                                                    console.log(value);
+                                                    console.log('----');
                                                     let attributes_options = attribute_obj[value.attribute_id]
                                                     return (
                                                         <>
@@ -860,6 +870,61 @@ const ProductEdit = () => {
                                                                             onChange={(e) => onChangeAmount(e, value.id)}
                                                                         />
                                                                     </label>
+                                                                </div>
+                                                                <div className="col-md-2">
+                                                                    {/* Multi-Select Dropdown for Shops */}
+                                                                    <Select
+                                                                        options={shops} // Ensure 'shops' is in the format [{ value: 1, label: "Main Branch" }, ...]
+                                                                        isMulti
+                                                                        // onChange={(e) => { handleAttributeShopChange(id, e) }}
+                                                                        // onChange={handleAttributeShopChange}
+                                                                        value={
+                                                                                value?.shop_quantities.map((shop, index) => {
+                                                                                    return (
+                                                                                        { value: shop.shop_id, label: shop.shop_name }
+                                                                                    );
+                                                                                })
+                                                                            }
+                                                                        onChange={(e) => { handleAttributeShopChange(value?.shop_id, e) }}
+                                                                        className="mb-3"
+                                                                        placeholder="Select Shops"
+                                                                    />
+
+                                                                    {/* Display Quantity Inputs for Selected Shops */}
+                                                                    {/* {value?.shop_quantities.map((shop) => (
+                                                                    <div key={shop.value} className="mb-2">
+                                                                        <label>{shop.label} Quantity</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            className="form-control"
+                                                                            value={shop.quantity}
+                                                                            // onChange={(e) =>
+                                                                            //     handleAttributeQuantityChange(
+                                                                            //         shop.value,
+                                                                            //         e.target.value
+                                                                            //     )
+                                                                            // }
+                                                                        />
+                                                                    </div>
+                                                                    ))} */}
+
+                                                                    {
+                                                                        value?.shop_quantities.map((shop, index) => {
+                                                                            const inputName = `shop_quantity_${shop.shop_id}`;
+                                                                            return (
+                                                                                <div key={shop.shop_id} className="mb-2">
+                                                                                    <label>{shop.shop_name} Quantity</label>
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        className="form-control"
+                                                                                        name={inputName}
+                                                                                        value={shop.quantity}
+                                                                                        onChange={(e) => handleAttributeInput(e, shop.shop_id)}
+                                                                                    />
+                                                                                </div>
+                                                                            );
+                                                                        })
+                                                                    }
                                                                 </div>
 
                                                                 <div className="col-md-2">
