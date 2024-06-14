@@ -214,9 +214,11 @@ const ProductEdit = () => {
     };
 
     const handleAttributeFieldsRemove = (id) => {
-        setAttributeField((oldValues) =>
-            oldValues.filter((attributeFiled) => attributeFiled !== id)
-        );
+        setAttributeField((oldValues) =>{
+                oldValues.splice(id,1)
+                return oldValues
+            }
+    );
         setAttribute_input((current) => {
             const copy = { ...current };
             delete copy[id];
@@ -796,7 +798,7 @@ const ProductEdit = () => {
                                             {
                                                 attributeFiled.map((value, index) => {
                                                     console.log(value);
-                                                    console.log('----');
+                                                    console.log(index);
                                                     let attributes_options = attribute_obj[value.attribute_id]
                                                     return (
                                                         <>
@@ -962,6 +964,21 @@ const ProductEdit = () => {
                                                                         />
                                                                     </label>
                                                                 </div>
+                                                               {
+                                                                !(typeof value === 'object' && value !== null) ?
+                                                                ( <div className="col-md-2">
+                                                       
+                                                                <button
+                                                                    className={"btn btn-danger"}
+                                                                    onClick={() => handleAttributeFieldsRemove(index)}
+                                                                >
+                                                                    <i className="fa-solid fa-minus" />
+                                                                </button>
+                                                        </div>)
+                                                        :
+                                                        null
+                                                    
+                                                               }
 
                                                             </div>
 
