@@ -61,7 +61,6 @@ const ProductEdit = () => {
                 const costValue = response.data.data.cost.replace(/[৳,]/g, "");
                 const priceValue = response.data.data.price.replace(/[৳,]/g, "");
                 const shopData = response.data.data.shops;
-                console.log("Edit Data",response.data.data)
 
                 // Filter out duplicate shops based on shop_id
                 const uniqueShopData = [];
@@ -98,7 +97,7 @@ const ProductEdit = () => {
                     : [];
 
               
-                // console.log(response, 'response ')
+
 
                 // const productAttributes = response.data.data.attributes
                 //     ? [response.data.data.attributes.id]
@@ -155,10 +154,9 @@ const ProductEdit = () => {
                 // }
 
 
-                // console.log(response.data.data.attributes , 'PPOP')
+        
 
                 setAttributeField(response.data.data.attributes)
-                // console.log(response.data.data.attributes.length, 'vvv', product_attribute)
 
 
                 setSpecificationFiled(response.data.data.specifications)
@@ -226,11 +224,9 @@ const ProductEdit = () => {
     };
 
     const handleAttributeFields = (id) => {
-        console.log(attributeFiled.length);
         let attrib = attributes.length - attributeFiled.length
-        console.log('=');
+
         if (attrib >= attributeFieldId) {
-            console.log(attributeFieldId);
             setAttributeFieldId(attributeFieldId + 1);
             setAttributeField((prevState) => [...prevState, attributeFieldId]);
         }
@@ -392,7 +388,6 @@ const ProductEdit = () => {
             shop_ids: shopIds,
         };
 
-        console.log(payload);
 
         axios
             .put(`${Constants.BASE_URL}/product/${params.id}`, payload, {
@@ -458,9 +453,6 @@ const ProductEdit = () => {
     }, [selectedShops, quantities]);
 
     const handleAttributeShopChange = (row_no, e) => {
-        console.log(row_no);
-        console.log('***');
-        console.log(e);
         // setAttributeField((prev) => {
         //     return prev.map(item => {
         //       // manipulate shop_quantities here
@@ -471,7 +463,6 @@ const ProductEdit = () => {
         //           // update properties here
         //         };
         //       });
-        //       console.log(newShopQuantities)
           
         //       // return a new item object with the updated shop_quantities
         //       return {
@@ -813,9 +804,11 @@ const ProductEdit = () => {
 
                                             {
                                                 attributeFiled && attributeFiled?.map((value, index) => {
-                                                    console.log(value);
-                                                    console.log(index);
                                                     let attributes_options = attribute_obj[value.attribute_id]
+                                                    let data_obj = []
+                                                    if (attributeShopQuantities.hasOwnProperty(index)) {
+                                                        data_obj = attributeShopQuantities[index]
+                                                    }
                                                     return (
                                                         <>
                                                             <div key={index} className="row my-2 align-items-baseline">
@@ -915,7 +908,7 @@ const ProductEdit = () => {
                                                                     /> */}
 
                                                                     {
-                                                                        value?.shop_quantities && value?.shop_quantities?.map((shop) => {
+                                                                        value?.shop_quantities ? value?.shop_quantities?.map((shop) => {
                                                                             const inputName = `shop_quantity_${shop.shop_id}`;
                                                                             const shopName = {
                                                                                 value: shop.shop_id,
@@ -941,7 +934,34 @@ const ProductEdit = () => {
                                                                                     />
                                                                                 </div>
                                                                             );
-                                                                        })
+                                                                        }):
+                                                                        
+                                                                        <div>
+                                                                            <Select
+                                                                                options={shops} // Ensure 'shops' is in the format [{ value: 1, label: "Main Branch" }, ...]
+                                                                                isMulti
+                                                                                onChange={(e) => { handleAttributeShopChange(index, e) }}
+                                                                                className="mb-3"
+                                                                                placeholder="Select Shops"
+                                                                            />
+                                                            {
+                                                                data_obj.length > 0 && data_obj.map((shop, index) => {
+                                                                    const inputName = `shop_quantity_${shop.value}`;
+                                                                    return (
+                                                                        <div key={shop.value} className="mb-2">
+                                                                            <label>{shop.label} Quantity</label>
+                                                                            <input
+                                                                                type="number"
+                                                                                className="form-control"
+                                                                                name={inputName}
+                                                                                value={attribute_input[index]?.shop_quantities?.[shop.value] || ""}
+                                                                                onChange={(e) => handleAttributeInput(e, index)}
+                                                                            />
+                                                                        </div>
+                                                                    );
+                                                                })
+                                                            }
+                                                                         </div>
                                                                     }
                                                                 </div>
 
@@ -995,15 +1015,16 @@ const ProductEdit = () => {
                                                                 </div>
                                                                {
                                                                 !(typeof value === 'object' && value !== null) ?
-                                                                ( <div className="col-md-2">
-                                                       
-                                                                <button
-                                                                    className={"btn btn-danger"}
-                                                                    onClick={() => handleAttributeFieldsRemove(index)}
-                                                                >
-                                                                    <i className="fa-solid fa-minus" />
-                                                                </button>
-                                                        </div>)
+                                                                (
+                                                                     <div className="col-md-2">
+                                                                        <button
+                                                                            className={"btn btn-danger"}
+                                                                            onClick={() => handleAttributeFieldsRemove(index)}
+                                                                        >
+                                                                            <i className="fa-solid fa-minus" />
+                                                                        </button>
+                                                                </div>
+                                                        )
                                                         :
                                                         null
                                                     
