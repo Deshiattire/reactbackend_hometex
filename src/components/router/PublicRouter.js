@@ -1,9 +1,8 @@
-import React, { Children } from "react";
-import { createBrowserRouter } from "react-router-dom";
+
 import AuthLayout from "../layout/AuthLayout";
 import Login from "../modules/auth/Login";
 
-const PublicRouter = createBrowserRouter([
+const PublicRouter = [
   {
     path: "/",
     element: <AuthLayout />,
@@ -14,5 +13,5 @@ const PublicRouter = createBrowserRouter([
       },
     ],
   },
-]);
+];
 export default PublicRouter;

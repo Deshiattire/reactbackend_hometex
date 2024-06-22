@@ -267,7 +267,7 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      <div class="row justify-content-center align-items-center g-2">
+      <div className="row justify-content-center align-items-center g-2">
         <div className="col">
           <h3 className="text-center">Shops</h3>
           {product?.shops?.map((shop) => (

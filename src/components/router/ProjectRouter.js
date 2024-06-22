@@ -1,5 +1,4 @@
-import React, { Children } from "react";
-import { createBrowserRouter } from "react-router-dom";
+
 import Master from "../layout/Master";
 import Error500 from "../modules/auth/Error500";
 import BrandAdd from "../modules/brand/BrandAdd";
@@ -8,7 +7,6 @@ import BrandEdit from "../modules/brand/BrandEdit";
 import AddCategory from "../modules/category/AddCategory";
 import CategoryEdit from "../modules/category/CategoryEdit";
 import CategoryList from "../modules/category/CategoryList";
-import Dashboard from "../modules/Dashboard";
 import SubCategoryAdd from "../modules/subCategory/SubCategoryAdd";
 import SubCategoryEdit from "../modules/subCategory/SubCategoryEdit";
 import SubcategoryList from "../modules/subCategory/SubcategoryList";
@@ -41,7 +39,7 @@ import ProductDetails from "../modules/product/ProductDetails";
 import ProductTransferList from "../modules/product/transferProduct/ProductTransferList";
 import ProductTransferForm from "../modules/product/transferProduct/ProductTransferForm";
 
-const ProjectRouter = createBrowserRouter([
+const ProjectRouter = [
   {
     path: "/",
     element: <Master />,
@@ -204,5 +202,5 @@ const ProjectRouter = createBrowserRouter([
       },
     ],
   },
-]);
+];
 export default ProjectRouter;

@@ -3,7 +3,7 @@ import Breadcrumb from "../../partoals/Breadcrumb";
 import Constants from "../../../Constants";
 import Swal from "sweetalert2";
 import CardHeader from "../../partoals/miniComponents/CardHeader";
-import { Link, redirect, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Select from "react-select";
 import ReactQuill from "react-quill";
@@ -20,7 +20,6 @@ const ProductEdit = () => {
     const [subCategories, setSubCategories] = useState([]);
     const [childSubCategories, setChildSubCategories] = useState([]);
     const [brands, setBrands] = useState([]);
-    const [addProductData, setAddProductData] = useState([]);
     const [allSubcategories, setAllSubcategories] = useState([]);
     const [allChildSubcategories, setAllChildSubcategories] = useState([]);
     const [countries, setCountries] = useState([]);
@@ -35,10 +34,8 @@ const ProductEdit = () => {
     const [selectedShops, setSelectedShops] = useState([]);
     const [quantities, setQuantities] = useState({});
     const [totalStock, setTotalStock] = useState(0);
-    const [product, setProduct] = useState([]);
     const [input, setInput] = useState({});
     const [attributeShopQuantities, setAttributeShopQuantities] = useState({});
-    const [multiValue, setMultiValue] = useState();
 
     const handleDescriptionChange = (value) => {
         setInput((prevState) => ({
@@ -64,6 +61,7 @@ const ProductEdit = () => {
                 const costValue = response.data.data.cost.replace(/[৳,]/g, "");
                 const priceValue = response.data.data.price.replace(/[৳,]/g, "");
                 const shopData = response.data.data.shops;
+                console.log("Edit Data",response.data.data)
 
                 // Filter out duplicate shops based on shop_id
                 const uniqueShopData = [];
@@ -99,7 +97,7 @@ const ProductEdit = () => {
                     ? [response.data.data.attributes]
                     : [];
 
-
+              
                 // console.log(response, 'response ')
 
                 // const productAttributes = response.data.data.attributes
@@ -214,9 +212,11 @@ const ProductEdit = () => {
     };
 
     const handleAttributeFieldsRemove = (id) => {
-        setAttributeField((oldValues) =>
-            oldValues.filter((attributeFiled) => attributeFiled !== id)
-        );
+        setAttributeField((oldValues) =>{
+                oldValues.splice(id,1)
+                return oldValues
+            }
+    );
         setAttribute_input((current) => {
             const copy = { ...current };
             delete copy[id];
@@ -280,7 +280,6 @@ const ProductEdit = () => {
                 },
             })
             .then((res) => {
-
                 setCategories(res.data.categories);
                 setBrands(res.data.brands);
                 setCountries(res.data.countries);
@@ -462,6 +461,25 @@ const ProductEdit = () => {
         console.log(row_no);
         console.log('***');
         console.log(e);
+        // setAttributeField((prev) => {
+        //     return prev.map(item => {
+        //       // manipulate shop_quantities here
+        //       let newShopQuantities = item.shop_quantities.map(shopQuantity => {
+        //         // return a new shopQuantity object
+        //         return {
+        //           ...shopQuantity,
+        //           // update properties here
+        //         };
+        //       });
+        //       console.log(newShopQuantities)
+          
+        //       // return a new item object with the updated shop_quantities
+        //       return {
+        //         ...item,
+        //         shop_quantities: newShopQuantities,
+        //       };
+        //     });
+        //   });
         setAttributeShopQuantities({
             ...attributeShopQuantities,
             [row_no]: e
@@ -794,9 +812,9 @@ const ProductEdit = () => {
                                         <div className="card-body">
 
                                             {
-                                                attributeFiled.map((value, index) => {
+                                                attributeFiled && attributeFiled?.map((value, index) => {
                                                     console.log(value);
-                                                    console.log('----');
+                                                    console.log(index);
                                                     let attributes_options = attribute_obj[value.attribute_id]
                                                     return (
                                                         <>
@@ -878,7 +896,7 @@ const ProductEdit = () => {
                                                                     </label>
                                                                 </div>
                                                                 <div className="col-md-2">
-                                                                    <Select
+                                                                    {/* <Select
                                                                         options={shops} // Ensure 'shops' is in the format [{ value: 1, label: "Main Branch" }, ...]
                                                                         isMulti
                                                                         // onChange={(e) => { handleAttributeShopChange(id, e) }}
@@ -893,13 +911,26 @@ const ProductEdit = () => {
                                                                         // onChange={(e) => { handleAttributeShopChange(value?.id, e) }}
                                                                         className="mb-3"
                                                                         placeholder="Select Shops"
-                                                                    />
+                                                                        value={selectedShops}
+                                                                    /> */}
 
-                                                                    {/* {
-                                                                        value?.shop_quantities.map((shop, index) => {
+                                                                    {
+                                                                        value?.shop_quantities && value?.shop_quantities?.map((shop) => {
                                                                             const inputName = `shop_quantity_${shop.shop_id}`;
+                                                                            const shopName = {
+                                                                                value: shop.shop_id,
+                                                                                label: shop.shop_name
+                                                                            }
                                                                             return (
                                                                                 <div key={shop.shop_id} className="mb-2">
+                                                                                    <Select
+                                                                                        options={shops} // Ensure 'shops' is in the format [{ value: 1, label: "Main Branch" }, ...]
+                                                                                        isMulti
+                                                                                        onChange={(e) => { handleAttributeShopChange(index, e) }}
+                                                                                        className="mb-3"
+                                                                                        placeholder="Select Shops"
+                                                                                        value={shopName}
+                                                                                    />
                                                                                     <label>{shop.shop_name} Quantity</label>
                                                                                     <input
                                                                                         type="number"
@@ -911,7 +942,7 @@ const ProductEdit = () => {
                                                                                 </div>
                                                                             );
                                                                         })
-                                                                    } */}
+                                                                    }
                                                                 </div>
 
                                                                 <div className="col-md-2">
@@ -962,6 +993,21 @@ const ProductEdit = () => {
                                                                         />
                                                                     </label>
                                                                 </div>
+                                                               {
+                                                                !(typeof value === 'object' && value !== null) ?
+                                                                ( <div className="col-md-2">
+                                                       
+                                                                <button
+                                                                    className={"btn btn-danger"}
+                                                                    onClick={() => handleAttributeFieldsRemove(index)}
+                                                                >
+                                                                    <i className="fa-solid fa-minus" />
+                                                                </button>
+                                                        </div>)
+                                                        :
+                                                        null
+                                                    
+                                                               }
 
                                                             </div>
 

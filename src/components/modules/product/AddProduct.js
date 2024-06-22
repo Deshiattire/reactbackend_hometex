@@ -310,7 +310,7 @@ const AddProduct = () => {
             stock: totalStock,
             shop_ids: shopIds,
         };
-
+        console.log("payload",payload)
         axios
             .post(`${Constants.BASE_URL}/product`, payload, {
                 headers: {
@@ -327,7 +327,7 @@ const AddProduct = () => {
                     toast: true,
                     timer: 1500,
                 });
-                if (res.data.product_id != undefined) {
+                if (res.data.product_id !== undefined) {
                     navigate("/product/photo/" + res.data.product_id);
                 }
             })

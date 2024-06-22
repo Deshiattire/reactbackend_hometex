@@ -219,7 +219,7 @@ const Report = () => {
                                                     <div className='card-body'>
                                                         <div className="d-flex align-items-center">
                                                             <div className="flex-shrink-0">
-                                                            <i class="fa-solid fa-hand-holding-dollar fa-2x"></i>
+                                                            <i className="fa-solid fa-hand-holding-dollar fa-2x"></i>
                                                             </div>
                                                             <div className="flex-grow-1 ms-3">
                                                                 <h6>Total Expense</h6>
@@ -234,7 +234,7 @@ const Report = () => {
                                                     <div className='card-body'>
                                                         <div className="d-flex align-items-center">
                                                             <div className="flex-shrink-0">
-                                                            <i class="fa-solid fa-sack-dollar fa-2x"></i>
+                                                            <i className="fa-solid fa-sack-dollar fa-2x"></i>
                                                             </div>
                                                             <div className="flex-grow-1 ms-3">
                                                                 <h6>Total Expense Today</h6>
@@ -259,7 +259,7 @@ const Report = () => {
                                                     <div className='card-body'>
                                                         <div className="d-flex align-items-center">
                                                             <div className="flex-shrink-0">
-                                                            <i class="fa-solid fa-right-from-bracket fa-2x"></i>
+                                                            <i className="fa-solid fa-right-from-bracket fa-2x"></i>
                                                             </div>
                                                             <div className="flex-grow-1 ms-3">
                                                                 <h6>Total Withdrawals</h6>
@@ -274,7 +274,7 @@ const Report = () => {
                                                     <div className='card-body'>
                                                         <div className="d-flex align-items-center">
                                                             <div className="flex-shrink-0">
-                                                            <i class="fa-solid fa-money-bill-transfer fa-2x"></i>
+                                                            <i className="fa-solid fa-money-bill-transfer fa-2x"></i>
                                                             </div>
                                                             <div className="flex-grow-1 ms-3">
                                                                 <h6>Total Withdrawals Today</h6>
@@ -299,7 +299,7 @@ const Report = () => {
                                                     <div className='card-body'>
                                                         <div className="d-flex align-items-center">
                                                             <div className="flex-shrink-0">
-                                                            <i class="fa-solid fa-arrow-trend-up fa-2x"></i>
+                                                            <i className="fa-solid fa-arrow-trend-up fa-2x"></i>
                                                             </div>
                                                             <div className="flex-grow-1 ms-3">
                                                                 <h6>Total Profits</h6>
@@ -314,7 +314,7 @@ const Report = () => {
                                                     <div className='card-body'>
                                                         <div className="d-flex align-items-center">
                                                             <div className="flex-shrink-0">
-                                                            <i class="fa-solid fa-chart-column fa-2x"></i>
+                                                            <i className="fa-solid fa-chart-column fa-2x"></i>
                                                             </div>
                                                             <div className="flex-grow-1 ms-3">
                                                                 <h6>Total Profits Today</h6>
