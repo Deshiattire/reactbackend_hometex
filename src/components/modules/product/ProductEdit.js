@@ -13,7 +13,7 @@ const ProductEdit = () => {
     const navigate = useNavigate();
     const params = useParams();
     const [attribute_input, setAttribute_input] = useState({});
-    const [specification_input, setSpecification_input] = useState({});
+    const [specification_input, setSpecification_input] = useState([{ name: '', value: '' }]);
     const [errors, setErrors] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [categories, setCategories] = useState([]);
@@ -36,14 +36,40 @@ const ProductEdit = () => {
     const [totalStock, setTotalStock] = useState(0);
     const [input, setInput] = useState({});
     const [attributeShopQuantities, setAttributeShopQuantities] = useState({});
+    const [attribute_obj, setAttribute_obj] = useState({});
+    const [changedAttributes, setChangedAttributes] = useState({});
 
+    
+    
     const handleDescriptionChange = (value) => {
         setInput((prevState) => ({
             ...prevState,
             description: value,
         }));
     };
-
+    // setAttributeField(response.data.data.attributes.map(attr => ({
+    //     ...attr,
+    //     shop_quantities: attr.shop_quantities || []
+    // })));
+    const handleAttributeShopQuantityChange = (attributeId, shopId, quantity) => {
+        setAttributeField((prevState) =>
+            prevState.map((attr) =>
+                attr.id === attributeId
+                    ? {
+                          ...attr,
+                          shop_quantities: attr.shop_quantities.map((sq) =>
+                              sq.shop_id === shopId ? { ...sq, quantity: parseInt(quantity) || 0 } : sq
+                          ),
+                      }
+                    : attr
+            )
+        );
+    };
+    const handleSpecificationChange = (index, field, value) => {
+        const newSpecifications = [...specification_input];
+        newSpecifications[index][field] = value;
+        setSpecification_input(newSpecifications);
+    };
     const getProduct = () => {
         const token = localStorage.getItem("token");
         const config = {
@@ -54,7 +80,7 @@ const ProductEdit = () => {
                 Authorization: `Bearer ${token}`,
             },
         };
-
+    
         axios
             .request(config)
             .then((response) => {
@@ -62,47 +88,38 @@ const ProductEdit = () => {
                 const priceValue = response.data.data.price.replace(/[৳,]/g, "");
                 const shopData = response.data.data.shops;
 
-                // Filter out duplicate shops based on shop_id
+                const transformedSpecifications = response.data.data.specifications.map(spec => ({
+                    name: spec.id,
+                    value: spec.name,
+                }));
+
+                setSpecificationFiled(transformedSpecifications || []);
+                setSpecification_input(transformedSpecifications || []);
+    
+                setAttributeField(response.data.data.attributes.map(attr => ({
+                    ...attr,
+                    shop_quantities: attr.shop_quantities || []
+                })));
+    
                 const uniqueShopData = [];
                 const shopIds = new Set();
-
+    
                 shopData.forEach((shop) => {
                     if (!shopIds.has(shop.shop_id)) {
                         uniqueShopData.push(shop);
                         shopIds.add(shop.shop_id);
                     }
                 });
-                const discountPercentValue = parseFloat(
-                    response.data.data.discount_percent
-                );
-                const discountFixedValue = parseFloat(
-                    response.data.data.discount_fixed
-                );
-                const discountEndDate = response.data.data.discount_end
-                    ? new Date(response.data.data.discount_end)
-                    : null;
-                const formattedDiscountEnd = discountEndDate
-                    ? discountEndDate.toISOString().slice(0, 16)
-                    : null;
-
-                const discountStartDate = response.data.data.discount_start
-                    ? new Date(response.data.data.discount_start)
-                    : null;
-                const formattedDiscountStart = discountStartDate
-                    ? discountStartDate.toISOString().slice(0, 16)
-                    : null;
-
-                const productAttributes = response.data.data.attributes
-                    ? [response.data.data.attributes]
-                    : [];
-
-              
-
-
-                // const productAttributes = response.data.data.attributes
-                //     ? [response.data.data.attributes.id]
-                //     : [];
-
+    
+                const discountPercentValue = parseFloat(response.data.data.discount_percent);
+                const discountFixedValue = parseFloat(response.data.data.discount_fixed);
+                const discountEndDate = response.data.data.discount_end ? new Date(response.data.data.discount_end) : null;
+                const formattedDiscountEnd = discountEndDate ? discountEndDate.toISOString().slice(0, 16) : null;
+                const discountStartDate = response.data.data.discount_start ? new Date(response.data.data.discount_start) : null;
+                const formattedDiscountStart = discountStartDate ? discountStartDate.toISOString().slice(0, 16) : null;
+    
+                const productAttributes = response.data.data.attributes ? [response.data.data.attributes] : [];
+    
                 const shopQuantities = {};
                 uniqueShopData.forEach((shop) => {
                     shopQuantities[shop.shop_id] = shop.shop_quantity;
@@ -134,34 +151,12 @@ const ProductEdit = () => {
                     status: response.data.data.status == "Active" ? 1 : 0,
                 });
                 setAttributes(productAttributes);
-
-
-                // Set the quantities for each shop in the state
                 setQuantities(shopQuantities);
-                // Pre-select shops
-                setSelectedShops(
-                    uniqueShopData.map((shop) => ({
-                        value: shop.shop_id,
-                        label: shop.shop_name,
-                    }))
-                );
-
-
-                // let product_attribute = [];
-                // if (typeof response.data.data.attributes != 'undefined') {
-                //     for (var it = 0; it < response.data.data.attributes.length; it++) {
-                //         product_attribute.push((it + 1))
-                //     }
-                // }
-
-
-        
-
-                setAttributeField(response.data.data.attributes)
-
-
-                setSpecificationFiled(response.data.data.specifications)
-
+                setSelectedShops(uniqueShopData.map((shop) => ({
+                    value: shop.shop_id,
+                    label: shop.shop_name,
+                })));
+                setAttributeField(response.data.data.attributes);
             })
             .catch((error) => {
                 console.error(error);
@@ -185,88 +180,126 @@ const ProductEdit = () => {
         setTotalStock(newTotalStock);
     }, [quantities]);
 
-    const handleCheckbox = (event) => {
-        const { name, checked } = event.target;
-        setInput((prevState) => ({
-            ...prevState,
-            [name]: checked,
-        }));
+    const handleSpecificationInput = (e, index) => {
+        const { name, value } = e.target;
+        const updatedSpecifications = [...specification_input];
+        updatedSpecifications[index] = { ...updatedSpecifications[index], [name]: value };
+        setSpecification_input(updatedSpecifications);
     };
-
-    const handleSpecificationFieldRemove = (id) => {
-        setSpecificationFiled((oldValues) =>
-            oldValues.filter((specificationFiled) => specificationFiled !== id)
-        );
-        setSpecification_input((current) => {
-            const copy = { ...current };
-            delete copy[id];
-            return copy;
-        });
-        setSpecificationFiledId(specificationFiledId - 1);
+    
+    
+    const handleSpecificationFieldRemove = (index) => {
+        setSpecificationFiled((prevState) => prevState.filter((_, i) => i !== index));
+        setSpecification_input((prevState) => prevState.filter((_, i) => i !== index));
     };
-
-    const handleSpecificationFields = (id) => {
-        setSpecificationFiledId(specificationFiledId + 1);
+    
+    const handleSpecificationFields = () => {
+        setSpecificationFiledId((prevId) => prevId + 1);
         setSpecificationFiled((prevState) => [...prevState, specificationFiledId]);
+        setSpecification_input((prevState) => [...prevState, { name: '', value: '' }]);
     };
+    
+    
+    
 
-    const handleAttributeFieldsRemove = (id) => {
-        setAttributeField((oldValues) =>{
-                oldValues.splice(id,1)
-                return oldValues
-            }
-    );
-        setAttribute_input((current) => {
-            const copy = { ...current };
-            delete copy[id];
-            return copy;
+    const handleAttributeFieldsRemove = (index) => {
+        setAttributeField((prevState) => {
+            const newState = prevState.filter((_, i) => i !== index);
+            console.log("Updated attributeField after removal:", newState);
+            return newState;
         });
-        setAttributeFieldId(attributeFieldId - 1);
+    
+        // Update the attribute_input state
+        setAttribute_input((prevState) => {
+            const newState = { ...prevState };
+            if (attributeFiled[index]) {
+                delete newState[attributeFiled[index].id];
+            }
+            return newState;
+        });
+    
+        // If you're tracking changes for API updates, add this
+        setChangedAttributes((prevState) => {
+            const newState = { ...prevState };
+            if (attributeFiled[index].id in newState) {
+                newState[attributeFiled[index].id] = { ...newState[attributeFiled[index].id], deleted: true };
+            }
+            return newState;
+        });
     };
-
-    const handleAttributeFields = (id) => {
-        let attrib = attributes.length - attributeFiled.length
-
-        if (attrib >= attributeFieldId) {
-            setAttributeFieldId(attributeFieldId + 1);
-            setAttributeField((prevState) => [...prevState, attributeFieldId]);
-        }
+    
+    
+    const handleAttributeFields = () => {
+        setAttributeField((prevState) => {
+            const newId = Math.max(...prevState.map(attr => attr.id), 0) + 1;
+            return [...prevState, {
+                id: newId,
+                attribute_id: '',
+                attribute_value_id: '',
+                attribute_value: '',
+                math_sign: '',
+                number: '',
+                cost: '',
+                weight: '',
+                measurement: '',
+                shop_quantities: []
+            }];
+        });
     };
+    
 
-    const handleSpecificationInput = (e, id) => {
-        setSpecification_input((prevState) => ({
+    const handleAttributeInput = (e, id, attributeName, index) => {
+        const { name, value } = e.target;
+        console.log("handleAttributeInput called with id:", id, "name:", name, "value:", value, "attributeName:", attributeName, "index:", index);
+    
+        setAttribute_input((prevState) => ({
             ...prevState,
             [id]: {
                 ...prevState[id],
-                [e.target.name]: e.target.value,
+                [name]: value,
+                ...(name === 'attribute_value_id' ? { attribute_value: attributeName } : {}),
             },
         }));
-    };
+    
+         // Update attributeField state as well
+    setAttributeField((prevState) =>
+        prevState.map((attr) =>
+            attr.id === id 
+            ? { 
+                ...attr, 
+                [name]: value,
+                ...(name === 'attribute_value_id' ? { attribute_value: attributeName } : {}),
+              } 
+            : attr
+        )
+    );
+};
+    
+    useEffect(() => {
+        console.log("Attribute input changed:", attribute_input);
+        // Assuming setInput is a function to update the main input state
+        setInput((prevState) => ({ ...prevState, attributes: attribute_input }));
+    }, [attribute_input]);
 
-    const handleAttributeInput = (e, id) => {
-        const { name, value } = e.target;
-
-        setAttribute_input((prevState) => {
-            if (name === "attribute_id" || name === "value_id") {
-                return {
-                    ...prevState,
-                    [id]: {
-                        ...prevState[id],
-                        [name]: value,
-                    },
-                };
-            } else if (name === "math_sign" || name === "number") {
-                return {
-                    ...prevState,
-                    [id]: {
-                        ...prevState[id],
-                        [name]: value,
-                    },
-                };
-            }
-            return prevState;
-        });
-    };
+    useEffect(() => {
+        console.log("Input state updated with attributes:", input.attributes);
+    }, [input]);
+    useEffect(() => {
+        console.log("Attribute input changed:", attribute_input); // Add this line
+        setInput((prevState) => ({ ...prevState, attributes: attribute_input }));
+    }, [attribute_input]);
+    
+    // Add additional logging to ensure the input state is updated correctly
+    useEffect(() => {
+        console.log("Input state updated with attributes:", input.attributes);
+    }, [input]);
+    
+    
+    useEffect(() => {
+        console.log("Attribute input changed:", attribute_input); // Add this line
+        setInput((prevState) => ({ ...prevState, attributes: attribute_input }));
+    }, [attribute_input]);
+    
 
     const getAddProductData = () => {
         const token = localStorage.getItem("token");
@@ -291,14 +324,7 @@ const ProductEdit = () => {
 
     const shopIds = shop_quantities.map((item) => item.shop_id);
 
-    const calculateTotalStock = (shopQuantities) => {
-        let totalStock = 0;
-        shopQuantities.forEach((shop) => {
-            totalStock += parseInt(shop.quantity, 10);
-        });
-        return totalStock;
-    };
-
+ 
     const handleInput = (e) => {
         if (e.target.name === "name") {
             let slug = e.target.value;
@@ -335,15 +361,7 @@ const ProductEdit = () => {
             [e.target.name]: e.target.value,
         }));
     };
-
-    const handlePhoto = (e) => {
-        let file = e.target.files[0];
-        let reader = new FileReader();
-        reader.onloadend = () => {
-            setInput((prevState) => ({ ...prevState, photo: reader.result }));
-        };
-        reader.readAsDataURL(file);
-    };
+ 
 
     // Update handleShopSelect to set selectedShops
     const handleShopSelect = (selectedOptions) => {
@@ -357,77 +375,97 @@ const ProductEdit = () => {
         setQuantities(newQuantities);
     };
 
+    
     const handleProductUpdate = () => {
         setIsLoading(true);
         const token = localStorage.getItem("token");
-        // Create a map of shop quantities for easy access
+
         const shopQuantityMap = {};
         shops.forEach((shop) => {
             shopQuantityMap[shop.shop_id] = shop.shop_quantity;
         });
 
-        // Update the 'input' data to match the 'shops' data and set shop_quantity equal to quantity
         const updatedInput = { ...input };
+
         updatedInput.shops = selectedShops.map((selectedShop) => {
             const shopId = selectedShop.value;
             const quantity = quantities[shopId] || 0;
+            const shop_name = selectedShop.label;
             if (shopQuantityMap.hasOwnProperty(shopId)) {
                 shopQuantityMap[shopId] = quantity;
             }
-            return { shop_id: shopId, shop_quantity: quantity };
+            return { shop_id: shopId, shop_name: shop_name, quantity: quantity };
         });
 
         const updatedShopQuantities = updatedInput.shops.map((shop) => {
-            return { shop_id: shop.shop_id, quantity: shop.shop_quantity };
+            return { shop_id: shop.shop_id, shop_name: shop.shop_name, quantity: shop.quantity };
         });
 
-        // Use the updated 'input' data in the payload
+        const attributeEntries = attributeFiled.map((attribute) => {
+            return {
+                // shop_quantities: attributeShopQuantities[attribute.id] || [],
+                attribute_id: attribute.attribute_id,
+                id: attribute.id,
+                value_id: attribute_input[attribute.id]?.attribute_value_id || attribute.attribute_value_id,
+                math_sign: attribute_input[attribute.id]?.math_sign || attribute.math_sign,
+                number: attribute_input[attribute.id]?.number || attribute.number,
+                attribute_cost: attribute_input[attribute.id]?.cost || attribute.cost,
+                attribute_weight: attribute_input[attribute.id]?.weight || attribute.weight,
+                attribute_mesarment: attribute_input[attribute.id]?.measurement || attribute.measurement,
+                shop_quantities: updatedShopQuantities,
+            };
+        });
+
+         // Add information about deleted attributes
+        const deletedAttributes = Object.keys(changedAttributes)
+        .filter(id => changedAttributes[id].deleted)
+        .map(id => ({ id, deleted: true }));
+
         const payload = {
             ...updatedInput,
-            shop_quantities: updatedShopQuantities,
+            
             stock: totalStock,
             shop_ids: shopIds,
+            attributes: [...attributeEntries, ...deletedAttributes],
+            specifications: specification_input,
         };
+        console.log(payload)
 
-
-        axios
-            .put(`${Constants.BASE_URL}/product/${params.id}`, payload, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((res) => {
-                setIsLoading(false);
-                if (res.data.product_id !== undefined) {
-                    getProduct();
-                }
-                Swal.fire({
-                    position: "top-end",
-                    icon: res.data.cls,
-                    title: res.data.msg,
-                    showConfirmButton: false,
-                    toast: true,
-                    timer: 1500,
-                });
-                if (res.data.product_id != undefined) {
-                    navigate("/product/photo/" + res.data.product_id);
-                }
-            })
-            .catch((errors) => {
-                setIsLoading(false);
-                if (errors.response.status == 422) {
-                    setErrors(errors.response.data.errors);
-                }
+        axios.put(`${Constants.BASE_URL}/product/${params.id}`, payload, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+        .then((res) => {
+            setIsLoading(false);
+            if (res.data.product_id !== undefined) {
+                getProduct();
+            }
+            Swal.fire({
+                position: "top-end",
+                icon: res.data.cls,
+                title: res.data.msg,
+                showConfirmButton: false,
+                toast: true,
+                timer: 1500,
             });
+            if (res.data.product_id !== undefined) {
+                navigate("/product/photo/" + res.data.product_id);
+            }
+        })
+        .catch((errors) => {
+            setIsLoading(false);
+            if (errors.response.status === 422) {
+                setErrors(errors.response.data.errors);
+            }
+        });
     };
 
     useEffect(() => {
         getAddProductData();
     }, []);
 
-    useEffect(() => {
-        setInput((prevState) => ({ ...prevState, attributes: attribute_input }));
-    }, [attribute_input]);
+  
 
     useEffect(() => {
         setInput((prevState) => ({
@@ -453,50 +491,108 @@ const ProductEdit = () => {
         setTotalStock(total);
     }, [selectedShops, quantities]);
 
-    const handleAttributeShopChange = (row_no, e) => {
-        // setAttributeField((prev) => {
-        //     return prev.map(item => {
-        //       // manipulate shop_quantities here
-        //       let newShopQuantities = item.shop_quantities.map(shopQuantity => {
-        //         // return a new shopQuantity object
-        //         return {
-        //           ...shopQuantity,
-        //           // update properties here
-        //         };
-        //       });
-          
-        //       // return a new item object with the updated shop_quantities
-        //       return {
-        //         ...item,
-        //         shop_quantities: newShopQuantities,
-        //       };
-        //     });
-        //   });
-        setAttributeShopQuantities({
-            ...attributeShopQuantities,
-            [row_no]: e
-        });
+    const handleAttributeShopChange = (attributeId, selectedOptions) => {
+        setAttributeField((prevState) =>
+            prevState.map((attr) =>
+                attr.id === attributeId
+                    ? {
+                          ...attr,
+                          shop_quantities: selectedOptions.map((option) => ({
+                              shop_id: option.value,
+                              shop_name: option.label,
+                              quantity: 0,
+                          })),
+                      }
+                    : attr
+            )
+        );
     };
-
     // Sanjib - 
-    let attribute_obj = {}
+ 
     attributesAll.length > 0 && attributesAll.map((val, ind) => {
         attribute_obj[val.id] = val.value;
     })
-    const onChangeArrtibute = (e, attribute_id) => {
-        const newAttributes = attributeFiled.map(obj => {
-            if (obj.id == attribute_id) return { ...obj, attribute_id: Number(e.target.value) };
-            return obj;
+    const onChangeArrtibute = (e, id, attributeName) => {
+        const { name, value } = e.target;
+        console.log("onChangeArrtibute called with id:", id, "name:", name, "value:", value, "attributeName:", attributeName);
+    
+        setAttribute_input((prevState) => {
+            const newState = {
+                ...prevState,
+                [id]: {
+                    ...prevState[id],
+                    [name]: value,
+                    attribute_name: attributeName,
+                },
+            };
+    
+            console.log("Updated attribute_input (onChangeArrtibute):", newState);
+            return newState;
         });
-        setAttributeField(newAttributes)
-    }
-    const onChangeAmount = (e, attribute_id) => {
-        const newAttributes = attributeFiled.map(obj => {
-            if (obj.id == attribute_id) return { ...obj, attribute_number: Number(e.target.value) };
-            return obj;
+    };
+    
+    // Corrected onChangeAttribute function
+const onChangeAttribute = (e, id, attributeName) => {
+    const { name, value } = e.target;
+    
+    setAttribute_input((prevState) => ({
+        ...prevState,
+        [id]: {
+            ...prevState[id],
+            [name]: value,
+            attribute_name: attributeName,
+            attribute_value: '',
+            attribute_value_id: '',
+        },
+    }));
+
+    // Update attributeField state
+    setAttributeField((prevState) =>
+        prevState.map((attr) =>
+            attr.id === id 
+            ? { 
+                ...attr, 
+                [name]: value,
+                attribute_name: attributeName,
+                attribute_value: '',
+                attribute_value_id: '',
+              } 
+            : attr
+        )
+    );
+};
+    const onChangeAmount = (e, id) => {
+        const { name, value } = e.target;
+        
+        setAttributeField((prevState) => {
+            const newState = prevState.map((item) => (item.id === id ? { ...item, [name]: value } : item));
+            return newState;
         });
-        setAttributeField(newAttributes)
-    }
+
+        setAttribute_input((prevState) => {
+            const newState = {
+                ...prevState,
+                [id]: {
+                    ...prevState[id],
+                    [name]: value,
+                },
+            };
+            return newState;
+        });
+
+        setChangedAttributes((prevState) => {
+            const newState = {
+                ...prevState,
+                [id]: {
+                    ...prevState[id],
+                    [name]: value,
+                },
+            };
+            return newState;
+        });
+    };
+
+    
 
 
     return (
@@ -534,8 +630,8 @@ const ProductEdit = () => {
                                             <input
                                                 className="form-control mt-2"
                                                 type="number"
-                                                name={`stock_${shop.value}`}
-                                                value={quantities[shop.value] || ""}
+                                                name={`shop_quantity_${shop.shop_id}`}
+                                                value={shop.quantity || ''}
                                                 onChange={(e) => handleQuantityChange(e, shop.value)}
                                                 placeholder={`Enter Product Stock for ${shop.label}`}
                                             />
@@ -796,460 +892,214 @@ const ProductEdit = () => {
                                     </label>
                                 </div>
 
-                                <div className="col-md-12">
-                                    <div className="card my-4">
-                                        <div className="card-header">
-                                            <h5>Select Product Attribute</h5>
-                                        </div>
-                                        <div className="card-body">
+                                <div className="row align-items-end">
+    <div className="card my-4">
+        <div className="card-header">
+            <h5>Select Product Attribute</h5>
+        </div>
+        <div className="card-body">
+            {attributeFiled.map((value, index) => (
+                <div key={value.id} className="attribute-box mb-4 p-3 border rounded">
+                    <div className="row align-items-baseline">
+                        <div className="col-md-3">
+                            <label className="w-100">
+                                <p>Select Attribute</p>
+                                <select
+                                    className="form-select"
+                                    name="attribute_id"
+                                    value={value.attribute_id || ''}
+                                    onChange={(e) => onChangeAttribute(e, value.id, e.target.options[e.target.selectedIndex].text)}
+                                >
+                                    <option value="">Select Attribute</option>
+                                    {attributesAll.map((attrValue, attrIndex) => (
+                                        <option key={attrIndex} value={attrValue.id}>
+                                            {attrValue.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                        </div>
 
-                                            {
-                                                attributeFiled && attributeFiled?.map((value, index) => {
-                                                    let attributes_options = attribute_obj[value.attribute_id]
-                                                    let data_obj = []
-                                                    if (attributeShopQuantities.hasOwnProperty(index)) {
-                                                        data_obj = attributeShopQuantities[index]
-                                                    }
-                                                    return (
-                                                        <>
-                                                            <div key={index} className="row my-2 align-items-baseline">
-                                                                <div className="col-md-3">
-                                                                    <label className={"w-100 mt-4"}>
-                                                                        <p>Select Attribute</p>
-                                                                        <select className="form-select mt-2" name={"attribute_id"} onChange={(e) => { onChangeArrtibute(e, value.id) }}  >
-                                                                            <option>Select Attribute</option>
-                                                                            {
-                                                                                attributesAll.map((attrValue, attrIndex) => {
-                                                                                    const isSelected = value?.attribute_id === attrValue?.id;
-                                                                                    return (<>
-                                                                                        <option value={attrValue?.id} selected={isSelected ? 'selected' : null}  >{attrValue?.name}</option>
-                                                                                    </>)
-                                                                                })
-                                                                            }
-                                                                        </select>
-                                                                        <p className={"login-error-msg"}>
-                                                                            <small>
-                                                                                {errors.attribute_id != undefined
-                                                                                    ? errors.attribute_id[0]
-                                                                                    : null}
-                                                                            </small>
-                                                                        </p>
-                                                                    </label>
-                                                                </div>
+                        <div className="col-md-3">
+                            <label className="w-100">
+                                <p>Select Attribute Value</p>
+                                <select
+                                    className="form-select"
+                                    name="attribute_value_id"
+                                    value={value.attribute_value_id || ''}
+                                    onChange={(e) => handleAttributeInput(e, value.id, e.target.options[e.target.selectedIndex].text)}
+                                >
+                                    <option value="">Select Attribute Value</option>
+                                    {attribute_obj[value.attribute_id]?.map((val, indz) => (
+                                        <option key={indz} value={val.id}>
+                                            {val.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                        </div>
 
-                                                                <div className="col-md-3">
-                                                                    <label className={"w-100 mt-4"}>
-                                                                        <p>Select Attribute Value</p>
-                                                                        <select className={"form-select mt-2"} name={"value_id"}  >
-                                                                            <option>Select Attribute Value</option>
-                                                                            {
-                                                                                attributes_options && attributes_options.length > 0 && attributes_options.map((val, indz) => {
-                                                                                    
-                                                                                    const isSelected = value?.attribute_value_id === val?.id;
-                                                                                    return (<>
-                                                                                        <option value={val?.id} selected={isSelected ? 'selected' : null}  >{val?.name}</option>
-                                                                                    </>)
-                                                                                })
-                                                                            }
-                                                                        </select>
-                                                                        <p className={"login-error-msg"}>
-                                                                            <small>
-                                                                                {errors.attribute_id != undefined
-                                                                                    ? errors.attribute_id[0]
-                                                                                    : null}
-                                                                            </small>
-                                                                        </p>
-                                                                    </label>
-                                                                </div>
+                        <div className="col-md-2">
+                            <label className="w-100">
+                                <p>Select Mathematical Sign</p>
+                                <select 
+                                    className="form-select" 
+                                    name="math_sign"
+                                    value={value.math_sign || ''}
+                                    onChange={(e) => handleAttributeInput(e, value.id)}
+                                >
+                                    <option value="">Select Sign</option>
+                                    <option value="+">+</option>
+                                    <option value="-">-</option>
+                                    <option value="*">*</option>
+                                    <option value="/">/</option>
+                                </select>
+                            </label>
+                        </div>
 
+                        <div className="col-md-2">
+                            <label className="w-100">
+                                <p>Enter amount</p>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    name="number"
+                                    value={value.number || ''}
+                                    onChange={(e) => handleAttributeInput(e, value.id)}
+                                />
+                            </label>
+                        </div>
 
-                                                                <div className="col-md-2">
-                                                                    <label className="w-100 mt-4">
-                                                                        <p>Select Mathematical Sign</p>
-                                                                        <select className="form-select mt-2" name="math_sign">
-                                                                            <option value="">Select Sign</option>
-                                                                            <option value="+" selected={(value?.math_sign == '+') ? true : null}>+</option>
-                                                                            <option value="-" selected={(value?.math_sign == '-') ? true : null} >-</option>
-                                                                            <option value="*" selected={(value?.math_sign == '*') ? true : null}>*</option>
-                                                                            <option value="/" selected={(value?.math_sign == '/') ? true : null}>/</option>
-                                                                        </select>
-                                                                    </label>
-                                                                </div>
-
-
-                                                                <div className="col-md-2">
-                                                                    <label className="w-100 mt-4">
-                                                                        <p>Enter amount</p>
-                                                                        <input
-                                                                            type="number"
-                                                                            className="form-control mt-2"
-                                                                            name="number"
-                                                                            value={value?.number}
-                                                                            onChange={(e) => onChangeAmount(e, value.id)}
-                                                                        />
-                                                                    </label>
-                                                                </div>
-                                                                <div className="col-md-2">
-                                                                    {/* <Select
-                                                                        options={shops} // Ensure 'shops' is in the format [{ value: 1, label: "Main Branch" }, ...]
-                                                                        isMulti
-                                                                        // onChange={(e) => { handleAttributeShopChange(id, e) }}
-                                                                        // onChange={handleAttributeShopChange}
-                                                                        // value={
-                                                                        //         value?.shop_quantities.map((shop, index) => {
-                                                                        //             return (
-                                                                        //                 { value: shop?.shop_id, label: shop?.shop_name }
-                                                                        //             );
-                                                                        //         })
-                                                                        //     }
-                                                                        // onChange={(e) => { handleAttributeShopChange(value?.id, e) }}
-                                                                        className="mb-3"
-                                                                        placeholder="Select Shops"
-                                                                        value={selectedShops}
-                                                                    /> */}
-
-                                                                    {
-                                                                        value?.shop_quantities ? value?.shop_quantities?.map((shop) => {
-                                                                            const inputName = `shop_quantity_${shop.shop_id}`;
-                                                                            const shopName = {
-                                                                                value: shop.shop_id,
-                                                                                label: shop.shop_name
-                                                                            }
-                                                                            return (
-                                                                                <div key={shop.shop_id} className="mb-2">
-                                                                                    <Select
-                                                                                        options={shops} // Ensure 'shops' is in the format [{ value: 1, label: "Main Branch" }, ...]
-                                                                                        isMulti
-                                                                                        onChange={(e) => { handleAttributeShopChange(index, e) }}
-                                                                                        className="mb-3"
-                                                                                        placeholder="Select Shops"
-                                                                                        value={shopName}
-                                                                                    />
-                                                                                    <label>{shop.shop_name} Quantity</label>
-                                                                                    <input
-                                                                                        type="number"
-                                                                                        className="form-control"
-                                                                                        name={inputName}
-                                                                                        defaultValue={shop.quantity}
-                                                                                        onChange={(e) => handleAttributeInput(e, shop.shop_id)}
-                                                                                    />
-                                                                                </div>
-                                                                            );
-                                                                        }):
-                                                                        
-                                                                        <div>
-                                                                            <Select
-                                                                                options={shops} // Ensure 'shops' is in the format [{ value: 1, label: "Main Branch" }, ...]
-                                                                                isMulti
-                                                                                onChange={(e) => { handleAttributeShopChange(index, e) }}
-                                                                                className="mb-3"
-                                                                                placeholder="Select Shops"
-                                                                            />
-                                                            {
-                                                                data_obj.length > 0 && data_obj.map((shop, index) => {
-                                                                    const inputName = `shop_quantity_${shop.value}`;
-                                                                    return (
-                                                                        <div key={shop.value} className="mb-2">
-                                                                            <label>{shop.label} Quantity</label>
-                                                                            <input
-                                                                                type="number"
-                                                                                className="form-control"
-                                                                                name={inputName}
-                                                                                value={attribute_input[index]?.shop_quantities?.[shop.value] || ""}
-                                                                                onChange={(e) => handleAttributeInput(e, index)}
-                                                                            />
-                                                                        </div>
-                                                                    );
-                                                                })
-                                                            }
-                                                                         </div>
-                                                                    }
-                                                                </div>
-
-                                                                <div className="col-md-2">
-                                                                    <label className="w-100 mt-4">
-                                                                        <p>Product Cost</p>
-                                                                        <input
-                                                                            type="number"
-                                                                            className="form-control mt-2"
-                                                                            name="attribute_cost"
-                                                                            value={value?.cost}
-                                                                            onChange={(e) => onChangeAmount(e, value.id)}
-                                                                        />
-                                                                    </label>
-                                                                </div>
-                                                                <div className="col-md-2">
-                                                                    <label className="w-100 mt-4">
-                                                                        <p>Product Quantity</p>
-                                                                        <input
-                                                                            type="number"
-                                                                            className="form-control mt-2"
-                                                                            name="attribute_quantity"
-                                                                            value={value?.quantity}
-                                                                            onChange={(e) => onChangeAmount(e, value.id)}
-                                                                        />
-                                                                    </label>
-                                                                </div>
-                                                                <div className="col-md-2">
-                                                                    <label className="w-100 mt-4">
-                                                                        <p>Product Weight (Gram)</p>
-                                                                        <input
-                                                                            type="number"
-                                                                            className="form-control mt-2"
-                                                                            name="attribute_weight"
-                                                                            value={value?.weight}
-                                                                            onChange={(e) => onChangeAmount(e, value.id)}
-                                                                        />
-                                                                    </label>
-                                                                </div>
-                                                                <div className="col-md-2">
-                                                                    <label className="w-100 mt-4">
-                                                                        <p>Product Mesarment</p>
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control mt-2"
-                                                                            name="attribute_mesarment"
-                                                                            value={value?.measurement}
-                                                                            onChange={(e) => onChangeAmount(e, value.id)}
-                                                                        />
-                                                                    </label>
-                                                                </div>
-                                                               {
-                                                                !(typeof value === 'object' && value !== null) ?
-                                                                (
-                                                                     <div className="col-md-2">
-                                                                        <button
-                                                                            className={"btn btn-danger"}
-                                                                            onClick={() => handleAttributeFieldsRemove(index)}
-                                                                        >
-                                                                            <i className="fa-solid fa-minus" />
-                                                                        </button>
-                                                                </div>
-                                                        )
-                                                        :
-                                                        null
-                                                    
-                                                               }
-
-                                                            </div>
-
-                                                        </>
-                                                    )
-                                                })
-                                            }
-
-
-
-                                            {/* {attributeFiled.map((id, ind) => (
-
-                                                <div
-                                                    key={ind}
-                                                    className="row my-2 align-items-baseline"
-                                                >
-
-                                                    <div className="col-md-3">
-                                                        <label className={"w-100 mt-4"}>
-                                                            <p>Select Attribute</p>
-                                                            <select
-                                                                className="form-select mt-2"
-                                                                name={"attribute_id"}
-                                                                value={
-                                                                    attribute_input[id] != undefined
-                                                                        ? attribute_input[id].attribute_id
-                                                                        : null
-                                                                }
-                                                                onChange={(e) => handleAttributeInput(e, id)}
-                                                                placeholder={"Select product attribute"}
-                                                            >
-                                                                <option>Select Attribute</option>
-                                                                {attributes.map((value, index) => (
-                                                                    <option value={value?.id}>{value?.name}</option>
-                                                                ))}
-                                                            </select>
-                                                            <p className={"login-error-msg"}>
-                                                                <small>
-                                                                    {errors.attribute_id != undefined
-                                                                        ? errors.attribute_id[0]
-                                                                        : null}
-                                                                </small>
-                                                            </p>
-                                                        </label>
-                                                    </div>
-
-                                                    <div className="col-md-3">
-                                                        <label className={"w-100 mt-4"}>
-                                                            <p>Select Attribute Value</p>
-                                                            <select
-                                                                className={"form-select mt-2"}
-                                                                name={"value_id"}
-                                                                value={
-                                                                    attribute_input[id] != undefined
-                                                                        ? attribute_input[id].value_id
-                                                                        : null
-                                                                }
-                                                                onChange={(e) => handleAttributeInput(e, id)}
-                                                                placeholder={"Select product attribute value"}
-                                                            >
-                                                                <option>Select Attribute Value</option>
-                                                                {attributes.map((value, index) => (
-                                                                    <>
-                                                                        {attribute_input[id] != undefined &&
-                                                                            value.id == attribute_input[id].attribute_id
-                                                                            ? value.value.map(
-                                                                                (atr_value, value_ind) => (
-                                                                                    <option value={atr_value.id}>
-                                                                                        {atr_value.name}
-                                                                                    </option>
-                                                                                )
-                                                                            )
-                                                                            : null}
-                                                                    </>
-                                                                ))}
-                                                            </select>
-                                                            <p className={"login-error-msg"}>
-                                                                <small>
-                                                                    {errors.attribute_id != undefined
-                                                                        ? errors.attribute_id[0]
-                                                                        : null}
-                                                                </small>
-                                                            </p>
-                                                        </label>
-                                                    </div>                                              
-
-                                                    <div className="col-md-2">
-                                                        <label className="w-100 mt-4">
-                                                            <p>Select Mathematical Sign</p>
-                                                            <select
-                                                                className="form-select mt-2"
-                                                                name="math_sign"
-                                                                value={attribute_input[id]?.math_sign || ""}
-                                                                onChange={(e) => handleAttributeInput(e, id)}
-                                                            >
-                                                                <option value="">Select Sign</option>
-                                                                <option value="+">+</option>
-                                                                <option value="-">-</option>
-                                                                <option value="*">*</option>
-                                                                <option value="/">/</option>
-                                                            </select>
-                                                        </label>
-                                                    </div>
-                                                    <div className="col-md-2">
-                                                        <label className="w-100 mt-4">
-                                                            <p>Enter amount</p>
-                                                            <input
-                                                                type="number"
-                                                                className="form-control mt-2"
-                                                                name="number"
-                                                                value={attribute_input[id]?.number || ""}
-                                                                onChange={(e) => handleAttributeInput(e, id)}
-                                                            />
-                                                        </label>
-                                                    </div>                                                
-                                                    <div className="col-md-2">
-                                                        {attributeFiled.length - 1 == ind ? (
-                                                            <button
-                                                                className={"btn btn-danger"}
-                                                                onClick={() => handleAttributeFieldsRemove(id)}
-                                                            >
-                                                                <i className="fa-solid fa-minus" />
-                                                            </button>
-                                                        ) : null}
-                                                    </div>
-                                                </div>
-                                            ))} */}
-
-                                            <div className="row">
-                                                <div className="col-md-12 text-center">
-                                                    <button
-                                                        className={"btn btn-success"}
-                                                        onClick={handleAttributeFields}
-                                                    >
-                                                        <i className="fa-solid fa-plus" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                        <div className="col-md-2">
+                            <label className="w-100">
+                                <p>Select Shops</p>
+                                <Select
+                                    options={shops}
+                                    isMulti
+                                    value={value.shop_quantities?.map(sq => ({ value: sq.shop_id, label: sq.shop_name })) || []}
+                                    onChange={(selectedOptions) => handleAttributeShopChange(value.id, selectedOptions)}
+                                    className="mb-3"
+                                    placeholder="Select Shops"
+                                />
+                            </label>
+                            {value.shop_quantities?.map((shop) => (
+                                <div key={shop.shop_id} className="mb-2">
+                                    <label>{shop.shop_name} Quantity</label>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        name={`shop_quantity_${shop.shop_id}`}
+                                        value={shop.quantity || ''}
+                                        onChange={(e) => handleAttributeShopQuantityChange(value.id, shop.shop_id, e.target.value)}
+                                    />
                                 </div>
+                            ))}
+                        </div>
+
+                        <div className="col-md-2">
+                            <label className="w-100">
+                                <p>Product Cost</p>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    name="cost"
+                                    value={value.cost || ''}
+                                    onChange={(e) => handleAttributeInput(e, value.id)}
+                                />
+                            </label>
+                        </div>
+
+                        <div className="col-md-2">
+                            <label className="w-100">
+                                <p>Product Weight (Gram)</p>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    name="weight"
+                                    value={value.weight || ''}
+                                    onChange={(e) => handleAttributeInput(e, value.id)}
+                                />
+                            </label>
+                        </div>
+
+                        <div className="col-md-2">
+                            <label className="w-100">
+                                <p>Product Measurement</p>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    name="measurement"
+                                    value={value.measurement || ''}
+                                    onChange={(e) => handleAttributeInput(e, value.id)}
+                                />
+                            </label>
+                        </div>
+
+                        <div className="col-md-2 mt-4">
+                            {value.shop_quantities== '' && (
+                                <button
+                                    className="btn btn-danger"
+                                    onClick={() => handleAttributeFieldsRemove(index)}
+                                >
+                                    <i className="fa-solid fa-minus" /> 
+                                </button>
+                            )}
+                        </div>
+
+                    </div>
+                </div>
+            ))}
+
+            <div className="row">
+                <div className="col-md-12 text-center">
+                    <button
+                        className="btn btn-success mt-3"
+                        onClick={handleAttributeFields}
+                    >
+                        <i className="fa-solid fa-plus" /> Add Attribute
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
                                 <div className="col-md-12">
                                     <div className="card my-4">
                                         <div className="card-header">
                                             <h5>Product Specifications</h5>
                                         </div>
                                         <div className="card-body">
-                                            {specificationFiled.map((id, ind) => (
-                                                <div
-                                                    key={ind}
-                                                    className="row my-2 align-items-baseline"
-                                                >
-                                                    <div className="col-md-5">
-                                                        <label className={"w-100 mt-4"}>
-                                                            <p>Specification Name</p>
-                                                            <input
-                                                                className={"form-control mt-2"}
-                                                                type={"text"}
-                                                                name={"name"}
-                                                                // value={
-                                                                //     specification_input[id] != undefined
-                                                                //         ? specification_input[id].name
-                                                                //         : null
-                                                                // }
-                                                                value={id.name}
-                                                                // onChange={(e) =>
-                                                                //     handleSpecificationInput(e, id)
-                                                                // }
-                                                                placeholder={"Enter Product Specification Name"}
-                                                            />
-                                                            <p className={"login-error-msg"}>
-                                                                <small>
-                                                                    {errors.name != undefined
-                                                                        ? errors.name[0]
-                                                                        : null}
-                                                                </small>
-                                                            </p>
-                                                        </label>
-                                                    </div>
-                                                    <div className="col-md-5">
-                                                        <label className={"w-100 mt-4"}>
-                                                            <p>Specification Value</p>
-                                                            <input
-                                                                className="form-control mt-2"
-                                                                type={"text"}
-                                                                name={"value"}
-                                                                // value={
-                                                                //     specification_input[id] != undefined
-                                                                //         ? specification_input[id].value
-                                                                //         : null
-                                                                // }
-                                                                // onChange={(e) =>
-                                                                //     handleSpecificationInput(e, id)
-                                                                // }
-                                                                value={id.value}
-                                                                placeholder={"Enter Product Specification Name"}
-                                                            />
-                                                            <p className={"login-error-msg"}>
-                                                                <small>
-                                                                    {errors.name != undefined
-                                                                        ? errors.name[0]
-                                                                        : null}
-                                                                </small>
-                                                            </p>
-                                                        </label>
-                                                    </div>
-                                                    <div className="col-md-2">
-                                                        {specificationFiled.length - 1 == ind ? (
-                                                            <button
-                                                                className={"btn btn-danger"}
-                                                                onClick={() =>
-                                                                    handleSpecificationFieldRemove(id)
-                                                                }
-                                                            >
-                                                                <i className="fa-solid fa-minus" />
-                                                            </button>
-                                                        ) : null}
-                                                    </div>
-                                                </div>
-                                            ))}
+                                         
+                                        <div>
+                                        {specification_input.map((spec, index) => (
+        <div key={index} className="specification-field d-flex align-items-center mb-2">
+            <input
+                type="text"
+                name="name"
+                value={spec.name}
+                className="form-control me-2"
+                onChange={(e) => handleSpecificationChange(index, 'name', e.target.value)}
+            />
+            <input
+                type="text"
+                name="value"
+                value={spec.value}
+                className="form-control me-2"
+                onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
+            />
+            <button type="button" className="btn btn-danger" onClick={() => handleSpecificationFieldRemove(index)}>
+                <i className="fa-solid fa-minus" />
+            </button>
+        </div>
+    ))}
+    {/* <button type="button" onClick={handleSpecificationFields}>Add Specification</button> */}
+</div>
+
+{/* <button onClick={handleSpecificationFields}>Add Specification</button> */}
+
 
                                             <div className="row">
                                                 <div className="col-md-12 text-center">
