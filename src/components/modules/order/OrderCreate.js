@@ -209,6 +209,8 @@ const OrderCreate = () => {
         setShowAddCardModal(true)
         setProductWithAttributes(product)
     }
+
+    console.log("=>>>", productWithAttributes);
     const handleCartWithoutAttributeWise = (product) => {
         let other_fields = {
             'productId': +product.id,
@@ -230,13 +232,13 @@ const OrderCreate = () => {
         let attribute_name = '';
         let sell_price = product.sell_price.price;
         if (attribute_values) {
-            attribute_name = attribute_values.name + ' ' + attribute_values.value;
-            if (attribute_values?.attribute_math_sign == '+')
-                sell_price = sell_price + parseFloat(attribute_values?.attribute_number)
-            else if (attribute_values?.attribute_math_sign == '-')
-                sell_price = sell_price - parseFloat(attribute_values?.attribute_number)
-            else if (attribute_values?.attribute_math_sign == '*')
-                sell_price = sell_price * parseFloat(attribute_values?.attribute_number)
+            attribute_name = attribute_values.attribute_name + ' ' + attribute_values.attribute_value;
+            if (attribute_values?.math_sign == '+')
+                sell_price = sell_price + parseFloat(attribute_values?.number)
+            else if (attribute_values?.math_sign == '-')
+                sell_price = sell_price - parseFloat(attribute_values?.number)
+            else if (attribute_values?.math_sign == '*')
+                sell_price = sell_price * parseFloat(attribute_values?.number)
         }
 
         if (attributeId) setSelectedProductWithAttributes({
@@ -521,7 +523,7 @@ const OrderCreate = () => {
                                                         <option>Select Arrtibute</option>
                                                         {typeof productWithAttributes.attributes != 'undefined' && productWithAttributes?.attributes.map((attr, ind) => {
                                                             return (<>
-                                                                <option data-name={attr?.name + ' ' + attr?.value} value={attr?.id}> {attr?.name + ' ' + attr?.value} </option>
+                                                                <option data-name={attr?.attribute_name + ' ' + attr?.attribute_value} value={attr?.id}> {attr?.attribute_name + ' ' + attr?.attribute_value} </option>
                                                             </>)
                                                         })}
                                                     </select>
