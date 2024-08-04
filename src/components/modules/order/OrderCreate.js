@@ -66,7 +66,11 @@ const OrderCreate = () => {
     );
 
 
-
+    const paginateProducts = () => {
+        const indexOfLastProduct = currentPage * productsPerPage;
+        const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+        return allProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+      };
 
     const [products, setProducts] = useState([]);
     const [carts, setCarts] = useState({});
@@ -360,37 +364,33 @@ const OrderCreate = () => {
             [e.target.name]: e.target.value,
         }));
     };
-
-    const getProducts = (pageNumber = 1) => {
+    const [allProducts, setAllProducts] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [productsPerPage] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
+  
+    const getProducts = () => {
         setIsLoading(true);
         const token = localStorage.getItem("token");
         axios
-            .get(
-                `${Constants.BASE_URL}/product?page=${pageNumber}&search=${input.search}&order_by=${input.order_by}&per_page=${input.per_page}&direction=${input.direction}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            .then((res) => {
-                if (res && res.data) {
-                    setProducts(res.data.data);
-                    setItemsCountPerPage(res.data.meta.per_page);
-                    setStartFrom(res.data.meta.from);
-                    setTotalCountPerPage(res.data.meta.total);
-                    setActivePage(res.data.meta.current_page);
-                } else {
-                    // Handle the case where res.data or its properties are undefined.
-                }
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                setIsLoading(false);
-                console.error(error);
-                // Handle the axios request error here.
-            });
-    };
+          .get(
+            `${Constants.BASE_URL}/product?page=1&search=${input.search}&order_by=${input.order_by}&direction=${input.direction}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .then((res) => {
+            setAllProducts(res.data.data);
+            setTotalPages(Math.ceil(res.data.data.length / productsPerPage));
+            setIsLoading(false);
+          })
+          .catch((error) => {
+            console.log(error);
+      
+          });
+      };
 
     const calculateOrderSummery = () => {
         let items = 0;
@@ -537,59 +537,73 @@ const OrderCreate = () => {
                                                 </Modal.Body>
                                             </Modal>
 
+                                            {paginateProducts().length > 0 && (
+    paginateProducts().map((product, index) => {
+        let has_attributes = product.attributes.length > 0 ? 'yes' : 'no';
+        return (
+            <div className="d-flex align-items-center my-2 p-1 order-product-container position-relative" key={index}>
+                <div className="details-area">
+                    <button
+                        className="btn-success btn-sm ms-1"
+                        onClick={(e) => { 
+                            has_attributes === 'yes' ? handleCartAttributeWise(product) : handleCartWithoutAttributeWise(product);
+                        }}
+                    >
+                        <i className="fa-solid fa-plus" />
+                    </button>
+                    <button className="btn-info btn-sm ms-1">
+                        <i className="fa-solid fa-eye" />
+                    </button>
+                </div>
+                <div className="flex-shrink-0">
+                    <img
+                        className="order-product-photo img-thumbnail"
+                        src={product.primary_photo}
+                        alt="Hometex Products"
+                    />
+                </div>
+                <div className="flex-grow-1 ms-2">
+                    <p className="text-theme">
+                        <strong>{product.name}</strong>
+                    </p>
+                    <p>
+                        <small>Original Price: {product.price}</small>
+                    </p>
+                    <p className="text-theme">
+                        <small>
+                            <strong>
+                                Price: {product.sell_price.price}{product.sell_price.symbol} | Discount: {product.sell_price.discount}{product.sell_price.symbol}
+                            </strong>
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            SKU: {product.sku} | Stock: {product.stock}
+                        </small>
+                    </p>
+                </div>
+            </div>
+        );
+    })
+)}
 
-                                            {products.map((product, index) => {
-                                                // console.log(product.attributes.length, '--', product.name, '--', 'product_loop')
-                                                let has_attriutes = product.attributes.length > 0 ? 'yes' : 'no'
-                                                return (
-                                                    <>
-                                                        <div className="d-flex align-items-center my-2 p-1 order-product-container position-relative" key={index} >
-                                                            <div className="details-area">
-                                                                <button
-                                                                    className="btn-success btn-sm ms-1"
-                                                                    // onClick={() => handleCart(product.id)}
-                                                                    onClick={(e) => { has_attriutes == 'yes' ? handleCartAttributeWise(product) : handleCartWithoutAttributeWise(product) }}
-                                                                >
-                                                                    <i className="fa-solid fa-plus" />
-                                                                </button>
-                                                                <button className="btn-info btn-sm ms-1">
-                                                                    <i className="fa-solid fa-eye " />
-                                                                </button>
-                                                            </div>
-                                                            <div className="flex-shrink-0">
-                                                                <img
-                                                                    className="order-product-photo img-thumbnail"
-                                                                    src={product.primary_photo}
-                                                                    alt="Hometex Products"
-                                                                />
-                                                            </div>
-                                                            <div className="flex-grow-1 ms-2">
-                                                                <p className="text-theme">
-                                                                    <strong>{product.name}</strong>
-                                                                </p>
-                                                                <p>
-                                                                    <small>Original Price: {product.price}</small>
-                                                                </p>
-                                                                <p className={"text-theme"}>
-                                                                    <small>
-                                                                        <strong>
-                                                                            Price: {product.sell_price.price}
-                                                                            {product.sell_price.symbol} | Discount:
-                                                                            {product.sell_price.discount}
-                                                                            {product.sell_price.symbol}
-                                                                        </strong>
-                                                                    </small>
-                                                                </p>
-                                                                <p>
-                                                                    <small>
-                                                                        SKU: {product.sku} | Stock: {product.stock}
-                                                                    </small>
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </>
-                                                )
-                                            })}
+         <div className="pagination">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </button>
+                    <span>Page {currentPage} of {totalPages}</span>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </button>
+                  </div>
+
+
                                         </div>
                                     </div>
                                 </div>
