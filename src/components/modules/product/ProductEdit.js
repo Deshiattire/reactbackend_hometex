@@ -164,6 +164,7 @@ const ProductEdit = () => {
                 setSelectedShops(uniqueShopData.map((shop) => ({
                     value: shop.shop_id,
                     label: shop.shop_name,
+                    quantity: shop.shop_quantity
                 })));
                 setAttributeField(response.data.data.attributes);
             })
