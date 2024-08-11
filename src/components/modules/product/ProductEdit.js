@@ -353,7 +353,6 @@ const ProductEdit = () => {
     
 
     const handleInput = (e) => {
-        console.log("name",e.target.name);
         if (e.target.name === "name") {
             let slug = e.target.value;
             slug = slug.toLowerCase();
