@@ -22,6 +22,7 @@ const ProductTransferList = () => {
     axios
       .get(`${Constants.BASE_URL}/transfers`, { headers })
       .then((response) => {
+        console.log(response.data);
         setTransferData(response.data.data);
         setLoading(false);
       })
@@ -120,8 +121,9 @@ const ProductTransferList = () => {
                   <thead>
                     <tr>
                       <th>Product ID</th>
-                      <th>From Shop ID</th>
-                      <th>To Shop ID</th>
+                      <th>Product</th>
+                      <th>From Shop</th>
+                      <th>To Shop</th>
                       <th>Quantity</th>
                       <th>Status</th>
                     </tr>
@@ -129,9 +131,10 @@ const ProductTransferList = () => {
                   <tbody>
                     {transferData.map((transfer) => (
                       <tr key={transfer.id}>
-                        <td>{transfer.product_id}</td>
-                        <td>{transfer.from_shop_id}</td>
-                        <td>{transfer.to_shop_id}</td>
+                        <td>{transfer?.product_id}</td>
+                        <td>{transfer?.product?.name}</td>
+                        <td>{transfer?.from_shop?.name}</td>
+                        <td>{transfer.to_shop?.name}</td>
                         <td>{transfer.quantity}</td>
                         <td>{transfer.status}</td>
                         <td>
