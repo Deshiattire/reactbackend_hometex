@@ -144,7 +144,7 @@ const ProductList = () => {
   }, []);
 
   const handleGenerateBarcode = (product) => {
-    navigate(`/generate-bar-code`, { state: { productSKU: product?.sku } });
+    navigate(`/generate-bar-code`, { state: { productSKU: product } });
   };
 
   return (

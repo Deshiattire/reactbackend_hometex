@@ -29,6 +29,9 @@ const AddProduct = () => {
     const [attributeFiled, setAttributeField] = useState([]);
     const [attributeFieldId, setAttributeFieldId] = useState(1);
     const [specificationFiled, setSpecificationFiled] = useState([]);
+    const [metaFiled, setMetaFiled] = useState([]);
+    const [meta_input, setMeta_input] = useState({});
+    const [metaFiledId, setMetaFiledId] = useState(1);
     const [specificationFiledId, setSpecificationFiledId] = useState(1);
     const [selectedShops, setSelectedShops] = useState([]);
     const [quantities, setQuantities] = useState({});
@@ -108,6 +111,33 @@ const AddProduct = () => {
     const handleSpecificationFields = (id) => {
         setSpecificationFiledId(specificationFiledId + 1);
         setSpecificationFiled((prevState) => [...prevState, specificationFiledId]);
+    };
+
+    const handleMetaFields = (id) => {
+        setMetaFiledId(metaFiledId + 1);
+        setMetaFiled((prevState) => [...prevState, metaFiledId]);
+    };
+
+    const handleMetaInput = (e, id) => {
+        setMeta_input((prevState) => ({
+            ...prevState,
+            [id]: {
+                ...prevState[id],
+                [e.target.name]: e.target.value,
+            },
+        }));
+    };
+
+    const handleMetaFieldRemove = (id) => {
+        setMetaFiled((oldValues) =>
+            oldValues.filter((metaFiled) => metaFiled !== id)
+        );
+        setMeta_input((current) => {
+            const copy = { ...current };
+            delete copy[id];
+            return copy;
+        });
+        setMetaFiledId(metaFiledId - 1);
     };
 
     const handleAttributeFieldsRemove = (id) => {
@@ -311,32 +341,34 @@ const AddProduct = () => {
             shop_ids: shopIds,
         };
 
-        axios
-            .post(`${Constants.BASE_URL}/product`, payload, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((res) => {
-                setIsLoading(false);
-                Swal.fire({
-                    position: "top-end",
-                    icon: res.data.cls,
-                    title: res.data.msg,
-                    showConfirmButton: false,
-                    toast: true,
-                    timer: 1500,
-                });
-                if (res.data.product_id != undefined) {
-                    navigate("/product/photo/" + res.data.product_id);
-                }
-            })
-            .catch((errors) => {
-                setIsLoading(false);
-                if (errors.response.status == 422) {
-                    setErrors(errors.response.data.errors);
-                }
-            });
+        console.log(payload);
+
+        // axios
+        //     .post(`${Constants.BASE_URL}/product`, payload, {
+        //         headers: {
+        //             Authorization: `Bearer ${token}`,
+        //         },
+        //     })
+        //     .then((res) => {
+        //         setIsLoading(false);
+        //         Swal.fire({
+        //             position: "top-end",
+        //             icon: res.data.cls,
+        //             title: res.data.msg,
+        //             showConfirmButton: false,
+        //             toast: true,
+        //             timer: 1500,
+        //         });
+        //         if (res.data.product_id != undefined) {
+        //             navigate("/product/photo/" + res.data.product_id);
+        //         }
+        //     })
+        //     .catch((errors) => {
+        //         setIsLoading(false);
+        //         if (errors.response.status == 422) {
+        //             setErrors(errors.response.data.errors);
+        //         }
+        //     });
     };
 
     useEffect(() => {
@@ -351,8 +383,9 @@ const AddProduct = () => {
         setInput((prevState) => ({
             ...prevState,
             specifications: specification_input,
+            meta: meta_input
         }));
-    }, [specification_input]);
+    }, [specification_input, meta_input]);
 
     const handleMulipleSelect = (e) => {
         let value = [];
@@ -1005,6 +1038,98 @@ const AddProduct = () => {
                                                     <button
                                                         className={"btn btn-success"}
                                                         onClick={handleSpecificationFields}
+                                                    >
+                                                        <i className="fa-solid fa-plus" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-12">
+                                    <div className="card my-4">
+                                        <div className="card-header">
+                                            <h5>Product SEO friendly Info</h5>
+                                        </div>
+                                        <div className="card-body">
+                                            {metaFiled.map((id, ind) => (
+                                                <div
+                                                    key={ind}
+                                                    className="row my-2 align-items-baseline"
+                                                >
+                                                    <div className="col-md-5">
+                                                        <label className={"w-100 mt-4"}>
+                                                            <p>Mata Name</p>
+                                                            <input
+                                                                className={"form-control mt-2"}
+                                                                type={"text"}
+                                                                name={"name"}
+                                                                value={
+                                                                    meta_input[id] != undefined
+                                                                        ? meta_input[id].name
+                                                                        : null
+                                                                }
+                                                                onChange={(e) =>
+                                                                    handleMetaInput(e, id)
+                                                                }
+                                                                placeholder={"Enter Product Meta Name"}
+                                                            />
+                                                            <p className={"login-error-msg"}>
+                                                                <small>
+                                                                    {errors.name != undefined
+                                                                        ? errors.name[0]
+                                                                        : null}
+                                                                </small>
+                                                            </p>
+                                                        </label>
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <label className={"w-100 mt-4"}>
+                                                            <p>Mata Content</p>
+                                                            <input
+                                                                className="form-control mt-2"
+                                                                type={"text"}
+                                                                name={"content"}
+                                                                value={
+                                                                    meta_input[id] != undefined
+                                                                        ? meta_input[id].value
+                                                                        : null
+                                                                }
+                                                                onChange={(e) =>
+                                                                    handleMetaInput(e, id)
+                                                                }
+                                                                placeholder={"Enter Product Meta Content"}
+                                                            />
+                                                            <p className={"login-error-msg"}>
+                                                                <small>
+                                                                    {errors.name != undefined
+                                                                        ? errors.name[0]
+                                                                        : null}
+                                                                </small>
+                                                            </p>
+                                                        </label>
+                                                    </div>
+                                                    <div className="col-md-1">
+                                                        {metaFiled.length - 1 == ind ? (
+                                                            <button
+                                                                className={"btn btn-danger"}
+                                                                onClick={() =>
+                                                                    handleMetaFieldRemove(id)
+                                                                }
+                                                            >
+                                                                <i className="fa-solid fa-minus" />
+                                                            </button>
+                                                        ) : null}
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            <div className="row">
+                                                <div className="col-md-12 text-center">
+                                                    <button
+                                                        className={"btn btn-success"}
+                                                        onClick={handleMetaFields}
                                                     >
                                                         <i className="fa-solid fa-plus" />
                                                     </button>

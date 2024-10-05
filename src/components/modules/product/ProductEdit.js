@@ -59,6 +59,7 @@ const ProductEdit = () => {
         axios
             .request(config)
             .then((response) => {
+                console.log(response);
                 const costValue = response.data.data.cost.replace(/[৳,]/g, "");
                 const priceValue = response.data.data.price.replace(/[৳,]/g, "");
                 const shopData = response.data.data.shops;

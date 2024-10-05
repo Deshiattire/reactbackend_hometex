@@ -26,9 +26,13 @@ const BarCode = () => {
   const [subCategories, setSubCategories] = useState([]);
 
   useEffect(() => {
+    console.log(productSKU);
     setInput((prevInput) => ({
       ...prevInput,
-      name: productSKU || "",
+      name: productSKU?.name || "",
+      category_id: productSKU?.category?.id || "",
+      sub_category_id: productSKU?.child_sub_category?.id || "",
+      attribute_value_id: productSKU?.child_sub_category?.id || "",
     }));
   }, [productSKU]);
 
