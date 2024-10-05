@@ -137,19 +137,19 @@ function CsvProduct() {
                                 }}
                               />
                             </td>
-                            <td>{product.id}</td>
-                            <td>{product.name}</td>
-                            <td>{product.description}</td>
+                            <td>{product?.id}</td>
+                            <td>{product?.name}</td>
+                            <td dangerouslySetInnerHTML={{ __html: product?.description }} />
                             <td>in stock</td>
                             <td>new</td>
-                            <td>{product.sell_price.price}</td>
-                            <td>{product.id}</td>
-                            <td>{product.primary_photo}</td>
-                            <td>{product.brand}</td>
+                            <td>{product?.sell_price.price}</td>
+                            <td>{product?.id}</td>
+                            <td>{product?.primary_photo}</td>
+                            <td>{product?.brand?.name}</td>
                             <td>
                               <img
-                                src={product.primary_photo}
-                                alt={product.name}
+                                src={product?.primary_photo}
+                                alt={product?.name}
                                 className={"img-thumbnail table-image"}
                               />
                             </td>
