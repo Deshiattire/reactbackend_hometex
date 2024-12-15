@@ -38,6 +38,9 @@ import ChildSubCategoryAdd from "../modules/childSubCategory/ChildSubCategoryAdd
 import ProductDetails from "../modules/product/ProductDetails";
 import ProductTransferList from "../modules/product/transferProduct/ProductTransferList";
 import ProductTransferForm from "../modules/product/transferProduct/ProductTransferForm";
+import AddEcommerceMenu from "../modules/settings/AddEcommerceMenu";
+import EditEcommerceMenu from "../modules/settings/EditEcommerceMenu";
+import EcommerceMenuList from "../modules/settings/EcommerceMenuList";
 
 const ProjectRouter = [
   {
@@ -195,6 +198,18 @@ const ProjectRouter = [
       {
         path: "/price_formula/edit/:id",
         element: <PriceFormulaEdit/>,
+      },
+      {
+        path: "/ecommerce/menu-add",
+        element: <AddEcommerceMenu/>,
+      },
+      {
+        path: "/ecommerce/menu-list",
+        element: <EcommerceMenuList/>,
+      },
+      {
+        path: "/ecommerce/menu-edit",
+        element: <EditEcommerceMenu/>,
       },
       {
         path: "/error-500",

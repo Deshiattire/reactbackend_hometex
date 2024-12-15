@@ -205,77 +205,77 @@ const ChildSubCategoryList = () => {
                         {isLoading ? <Loader/> :
 
                         <div className="table-responsive soft-landing">
-                                <table className={"my-table table table-hover table-striped table-bordered"}>
-                                    <thead>
-                                        <tr>
-                                            <th>SL</th>
-                                            <th>Name / Slug / Sub-Category</th>
-                                            <th>Serial / Status</th>
-                                            <th>Photo</th>
-                                            <th>Created By</th>
-                                            <th>Date Time</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
+                            <table className={"my-table table table-hover table-striped table-bordered"}>
+                                <thead>
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Name / Slug / Sub-Category</th>
+                                        <th>Serial / Status</th>
+                                        <th>Photo</th>
+                                        <th>Created By</th>
+                                        <th>Date Time</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
 
-                                    <tbody>
-                                        {Object.keys(subCategories).length > 0 ? subCategories.map((category, number) => (
-                                            <tr key={number}>
-                                                <td>{startFrom + number}</td>
-                                                <td>
-                                                    <p className={"text-theme"}>Name: {category.name}</p>
-                                                    <p className={"text-success"}>Slug: {category.slug}</p>
-                                                    <p className={"text-theme"}>Sub-Category: {category.sub_category_name}</p>
-                                                </td>
-                                                <td>
-                                                    <p className={"text-theme"}>{category.serial}</p>
-                                                    <p className={"text-success"}>{category.status}</p>
-                                                </td>
-                                                <td>
-                                                    <img
-                                                        onClick={() =>
-                                                            handlePhotoModal(category.photo_full)
-                                                        }
-                                                        src={category.photo}
-                                                        alt={category.name}
-                                                        className={"img-thumbnail table-image"}
-                                                    />
-                                                </td>
-                                                <td>{category.created_by}</td>
-                                                <td>
-                                                    <p className={"text-theme"}>{category.created_at}</p>
-                                                    <p className={"text-success"}>
-                                                        {category.updated_at}
-                                                    </p>
-                                                </td>
-                                                <td>
-                                                    <button
-                                                        onClick={() =>
-                                                            handleDetailsModal(category)
-                                                        }
-                                                        className={"btn btn-sm my-1 btn-info"}><i className="fa-solid fa-eye"></i></button>
-                                                    <Link to={`/child-sub-category/edit/${category.id}`}><button className={"btn btn-sm my-1 mx-1 btn-warning"}><i className="fa-solid fa-pen-to-square"></i></button></Link>
-                                                    <button onClick={() => handleSubCategoryDelete(category.id)} className={"btn btn-sm my-1 btn-danger"}><i className="fa-solid fa-trash"></i></button>
-                                                </td>
-                                            </tr>
-                                        )): <NoDataFound/>}
-                                    </tbody>
-                                </table>
-                                <CategoryPhotoModal
-                                    show={modalPhotoShow}
-                                    onHide={() => setModalPhotoShow(false)}
-                                    title={"Child Sub Category Picture"}
-                                    size={""}
-                                    photo={modalPhoto}
-                                />
-                                <CategoryDetailsModal
-                                    show={modalShow}
-                                    onHide={() => setModalShow(false)}
-                                    title={"Child Sub Category Details"}
-                                    size={""}
-                                    category={category}
-                                />
-                            </div>
+                                <tbody>
+                                    {Object.keys(subCategories).length > 0 ? subCategories.map((category, number) => (
+                                        <tr key={number}>
+                                            <td>{startFrom + number}</td>
+                                            <td>
+                                                <p className={"text-theme"}>Name: {category.name}</p>
+                                                <p className={"text-success"}>Slug: {category.slug}</p>
+                                                <p className={"text-theme"}>Sub-Category: {category.sub_category_name}</p>
+                                            </td>
+                                            <td>
+                                                <p className={"text-theme"}>{category.serial}</p>
+                                                <p className={"text-success"}>{category.status}</p>
+                                            </td>
+                                            <td>
+                                                <img
+                                                    onClick={() =>
+                                                        handlePhotoModal(category.photo_full)
+                                                    }
+                                                    src={category.photo}
+                                                    alt={category.name}
+                                                    className={"img-thumbnail table-image"}
+                                                />
+                                            </td>
+                                            <td>{category.created_by}</td>
+                                            <td>
+                                                <p className={"text-theme"}>{category.created_at}</p>
+                                                <p className={"text-success"}>
+                                                    {category.updated_at}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    onClick={() =>
+                                                        handleDetailsModal(category)
+                                                    }
+                                                    className={"btn btn-sm my-1 btn-info"}><i className="fa-solid fa-eye"></i></button>
+                                                <Link to={`/child-sub-category/edit/${category.id}`}><button className={"btn btn-sm my-1 mx-1 btn-warning"}><i className="fa-solid fa-pen-to-square"></i></button></Link>
+                                                <button onClick={() => handleSubCategoryDelete(category.id)} className={"btn btn-sm my-1 btn-danger"}><i className="fa-solid fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    )): <NoDataFound/>}
+                                </tbody>
+                            </table>
+                            <CategoryPhotoModal
+                                show={modalPhotoShow}
+                                onHide={() => setModalPhotoShow(false)}
+                                title={"Child Sub Category Picture"}
+                                size={""}
+                                photo={modalPhoto}
+                            />
+                            <CategoryDetailsModal
+                                show={modalShow}
+                                onHide={() => setModalShow(false)}
+                                title={"Child Sub Category Details"}
+                                size={""}
+                                category={category}
+                            />
+                        </div>
                         }
 
                         </div>
