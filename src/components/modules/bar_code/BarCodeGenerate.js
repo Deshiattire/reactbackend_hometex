@@ -249,21 +249,21 @@ const BarCodeGenerate = () => {
     @page {
       size: 55mm 25mm; /* Custom receipt label size */
       margin: 5mm;
-    }
-
-    @media print {
-      body {
-        visibility: hidden;
-      }
-      
-      .barcode-print {
-        visibility: visible;
-        width: 80mm;
-        height: 50mm;
-        text-align: center;
-        font-family: Arial, sans-serif;
-      }
     }`
+
+    // @media print {
+    //   body {
+    //     visibility: hidden;
+    //   }
+      
+    //   .barcode-print {
+    //     visibility: visible;
+    //     width: 80mm;
+    //     height: 50mm;
+    //     text-align: center;
+    //     font-family: Arial, sans-serif;
+    //   }
+    // }`
 
   });
 
@@ -423,7 +423,7 @@ const BarCodeGenerate = () => {
                 </div>
               </div>
               <div style={{ position: "relative" }}>
-                <div className="bar-code-area-wraper mt-3 pt-3" ref={componentRef}>
+                <div className="bar-code-area-wraper mt-3 pt-3">
                 {products.length > 0 && (
                   <BarCodePage
                     products={products}
