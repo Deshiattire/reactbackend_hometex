@@ -94,6 +94,7 @@ const ProductEdit = () => {
 
     const getProduct = () => {
         const token = localStorage.getItem("token");
+        console.log(`${Constants.BASE_URL}/product/${params.id}`);
         const config = {
             method: "get",
             maxBodyLength: Infinity,
@@ -106,6 +107,7 @@ const ProductEdit = () => {
         axios
             .request(config)
             .then((response) => {
+                console.log(response);
                 const costValue = response.data.data.cost.replace(/[৳,]/g, "");
                 const priceValue = response.data.data.price.replace(/[৳,]/g, "");
                 const shopData = response.data.data.shops;
