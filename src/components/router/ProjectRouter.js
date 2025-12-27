@@ -31,6 +31,7 @@ import PriceFormulaList from "../modules/priceFormula/PriceFormulaList";
 import AddPriceFormula from "../modules/priceFormula/AddPriceFormula";
 import PriceFormulaEdit from "../modules/priceFormula/PriceFormulaEdit";
 import ProductEdit from "../modules/product/ProductEdit";
+import ProductEditNew from "../modules/product/ProductEditNew";
 import CsvProduct from "../modules/product/CsvProduct";
 import ChildSubCategoryList from "../modules/childSubCategory/ChildSubCategoryList";
 import ChildSubCategoryEdit from "../modules/childSubCategory/ChildSubCategoryEdit";
@@ -38,6 +39,11 @@ import ChildSubCategoryAdd from "../modules/childSubCategory/ChildSubCategoryAdd
 import ProductDetails from "../modules/product/ProductDetails";
 import ProductTransferList from "../modules/product/transferProduct/ProductTransferList";
 import ProductTransferForm from "../modules/product/transferProduct/ProductTransferForm";
+import AddEcommerceMenu from "../modules/settings/AddEcommerceMenu";
+import EditEcommerceMenu from "../modules/settings/EditEcommerceMenu";
+import EcommerceMenuList from "../modules/settings/EcommerceMenuList";
+import BarCodeGenerate from "../modules/bar_code/BarCodeGenerate";
+import Approvals from "../modules/approvals/Approvals";
 
 const ProjectRouter = [
   {
@@ -129,6 +135,10 @@ const ProjectRouter = [
         element: <ProductEdit/>,
       },
       {
+        path: "/product/edit-new/:id",
+        element: <ProductEditNew/>,
+      },
+      {
         path: "/product/transfer/list",
         element: <ProductTransferList/>,
       },
@@ -178,7 +188,7 @@ const ProjectRouter = [
       },
       {
         path: "/generate-bar-code",
-        element: <BarCode/>,
+        element: <BarCodeGenerate/>,
       },
       {
         path: "/reports",
@@ -195,6 +205,22 @@ const ProjectRouter = [
       {
         path: "/price_formula/edit/:id",
         element: <PriceFormulaEdit/>,
+      },
+      {
+        path: "/ecommerce/menu-add",
+        element: <AddEcommerceMenu/>,
+      },
+      {
+        path: "/ecommerce/menu-list",
+        element: <EcommerceMenuList/>,
+      },
+      {
+        path: "/ecommerce/menu-edit",
+        element: <EditEcommerceMenu/>,
+      },
+      {
+        path: "/approvals",
+        element: <Approvals/>,
       },
       {
         path: "/error-500",

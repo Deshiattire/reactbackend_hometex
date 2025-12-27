@@ -72,7 +72,7 @@ const ShowOrderConfirmation = ({handleOrderPlace, handleOrderSummaryInput, ...pr
                         <td>{++index}</td>
                         <td>{props.carts[key].name}</td>
                         <td>{props.carts[key].quantity}</td>
-                        <td>{props.carts[key].price}</td>
+                        <td>{props.carts[key].original_price}</td>
                         <td className='text-end'>{new Intl.NumberFormat('us').format(props.carts[key].original_price * props.carts[key].quantity)} ৳</td>
                         </tr>
                         ))}

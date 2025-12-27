@@ -12,7 +12,7 @@ import GlobalFunction from '../../../assets/GlobalFunction'
 
 function OrderList() {
     const [input, setInput] = useState({
-        order_by: 'serial',
+        order_by: 'id',
         per_page: 10,
         direction: 'asc',
         search: '',
@@ -113,11 +113,10 @@ function OrderList() {
                                             value={input.order_by}
                                             onChange={handleInput}
                                         >
-                                            <option value={"name"}>Name</option>
-                                            <option value={"serial"}>Serial</option>
-                                            <option value={"status"}>Status</option>
-                                            <option value={"created_at"}>Created At</option>
-                                            <option value={"updated_at"}>Updated At</option>
+                                            <option value={"id"}>Serial</option>
+                                            <option value={"order_number"}>Name</option>
+                                            <option value={"created_at"}>Created</option>
+                                            <option value={"updated_at"}>Updated</option>
                                         </select>
                                     </label>
                                 </div>

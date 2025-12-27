@@ -204,7 +204,7 @@ const PrintInvoice = ({ order, taxType }) => {
                     borderBottomStyle: "dotted",
                   }}
                 >
-                  {GlobalFunction.formatPrice(vat)}
+                  {GlobalFunction.formatPrice(vat) ?? 0}
                 </td>
               </tr>
               <tr>

@@ -40,6 +40,8 @@ export default function Nav() {
             })
             .catch(function (error) {
               console.log(error);
+              // Logout locally even if API returns 403
+              GlobalFunction.logOut();
             });
         }
       }
@@ -97,7 +99,7 @@ export default function Nav() {
       {/* Navbar */}
       <ul className="navbar-nav align-items-center ms-auto me-3 me-lg-4">
         <p className="text-white">
-          <strong>{branch !== undefined ? branch.name + " | " : ""}</strong>
+          <strong>{branch && branch.name ? branch.name + " | " : ""}</strong>
           {localStorage.name !== undefined ? localStorage.name : null}
         </p>
         <li className="nav-item dropdown">

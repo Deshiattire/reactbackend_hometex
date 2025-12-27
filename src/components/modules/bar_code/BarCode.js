@@ -26,14 +26,16 @@ const BarCode = () => {
   const [subCategories, setSubCategories] = useState([]);
 
   useEffect(() => {
-    console.log(productSKU);
-    setInput((prevInput) => ({
-      ...prevInput,
-      name: productSKU?.name || "",
-      category_id: productSKU?.category?.id || "",
-      sub_category_id: productSKU?.child_sub_category?.id || "",
-      attribute_value_id: productSKU?.child_sub_category?.id || "",
-    }));
+    if(productSKU){
+      console.log(productSKU);
+      setInput((prevInput) => ({
+        ...prevInput,
+        name: productSKU?.name || "",
+        category_id: productSKU?.category?.id || "",
+        sub_category_id: productSKU?.child_sub_category?.id || "",
+        attribute_value_id: productSKU?.child_sub_category?.id || "",
+      }));
+    }
   }, [productSKU]);
 
   const handleInput = (e) => {
@@ -136,6 +138,9 @@ const BarCode = () => {
   useEffect(() => {
     getCategories();
   }, []);
+
+  console.log("================");
+  console.log(componentRef.current);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,

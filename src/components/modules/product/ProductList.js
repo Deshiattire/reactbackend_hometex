@@ -19,6 +19,7 @@ const ProductList = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState([]);
+  const [paginateLink, setPaginateLink] = useState([]);
   const [startFrom, setStartFrom] = useState(1);
   const [productColumns, setProductColumns] = useState([]);
   const [duplicateMessage, setDuplicateMessage] = useState("");
@@ -30,12 +31,19 @@ const ProductList = () => {
     }));
   };
 
-  const getProducts = () => {
+  const getProducts = (paginate = null) => {
     setIsLoading(true);
     const token = localStorage.getItem("token");
+
+    const searchParam = input.search ? `&search=${input.search}` : '';
+    let url = `${Constants.BASE_URL}/products?page=1${searchParam}&order_by=${input.order_by}&direction=${input.direction}&paginate=yes`;
+    if(paginate !== null){
+      url = `${paginate}${searchParam}&order_by=${input.order_by}&direction=${input.direction}&paginate=yes`
+    }
+
     axios
       .get(
-        `${Constants.BASE_URL}/product?page=1&search=${input.search}&order_by=${input.order_by}&direction=${input.direction}`,
+        url,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -43,7 +51,8 @@ const ProductList = () => {
         }
       )
       .then((res) => {
-        setProducts(res.data.data);
+        setPaginateLink(res.data.meta);
+        setProducts(Array.isArray(res.data.data?.products) ? res.data.data.products : []);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -219,7 +228,7 @@ const ProductList = () => {
                 <div className="col-md-2">
                   <div className="d-grid mt-4">
                     <button
-                      onClick={() => getProducts(1)}
+                      onClick={() => getProducts()}
                       className={"btn theme-button"}
                     >
                       <i className="fa-solid fa-magnifying-glass"></i>
@@ -264,7 +273,7 @@ const ProductList = () => {
                                 Slug: {product.slug}
                               </p>
                               <p className={"text-success"}>
-                                {product.attributes != undefined &&
+                                {product.attributes !== undefined &&
                                 Object.keys(product.attributes).length > 0
                                   ? product.attributes.map(
                                       (attribute, index) => (
@@ -360,7 +369,7 @@ const ProductList = () => {
                                     <i className="fa-solid fa-eye"></i>
                                   </button>
                                 </Link>
-                                <Link to={`/product/edit/${product.id}`}>
+                                <Link to={`/product/edit-new/${product.id}`}>
                                   <button
                                     className={"btn btn-sm my-1 btn-warning"}
                                   >
@@ -409,6 +418,11 @@ const ProductList = () => {
                       )}
                     </tbody>
                   </table>
+                  <div>
+                    { paginateLink?.links?.map((item) => (
+                        <button onClick={() => getProducts(item?.url)} disabled={item?.active} dangerouslySetInnerHTML={{ __html: item.label }} />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

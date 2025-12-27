@@ -26,7 +26,7 @@ export default function Login() {
         }).catch(errors =>
             {
                 setIsLoading(false)
-                if(errors.response.status == 422 ){
+                if(errors.response.status === 422 ){
                     setErrors(errors.response.data.errors)
                 }
             })

@@ -18,6 +18,15 @@ export default function SideBar() {
                             <div className="sb-nav-link-icon"><i className="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </Link>
+                        
+                        {/* Approvals Section */}
+                        {(!productExist && !saleExist) && (
+                            <Link className="nav-link" to="/approvals">
+                                <div className="sb-nav-link-icon"><i className="fas fa-clipboard-check"></i></div>
+                                Approvals
+                            </Link>
+                        )}
+                        
                         {/* Report start */}
                         {
                                     (!productExist && !saleExist)  &&
@@ -171,6 +180,17 @@ export default function SideBar() {
                             <div className="sb-nav-link-icon"><i className="fas fa-table"></i></div>
                             Product Attributes
                         </Link>
+                        <Link className="nav-link collapsed" to="#" data-bs-toggle="collapse" data-bs-target="#settings" aria-expanded="false" aria-controls="collapseLayouts">
+                            <div className="sb-nav-link-icon"><i className="fas fa-columns"></i></div>
+                            Settings
+                            <div className="sb-sidenav-collapse-arrow"><i className="fas fa-angle-down"></i></div>
+                        </Link>
+                        <div className="collapse" id="settings" aria-labelledby="headingOne" data-bs-parent="#settingsAccordion">
+                            <nav className="sb-sidenav-menu-nested nav">
+                                <Link className="nav-link" to="/ecommerce/menu-list">Menu List</Link>
+                                <Link className="nav-link" to="/ecommerce/menu-add">Add Menu</Link>
+                            </nav>
+                        </div>
                         </>}
                             {/* </>
                         } */}

@@ -29,9 +29,6 @@ const AddProduct = () => {
     const [attributeFiled, setAttributeField] = useState([]);
     const [attributeFieldId, setAttributeFieldId] = useState(1);
     const [specificationFiled, setSpecificationFiled] = useState([]);
-    const [metaFiled, setMetaFiled] = useState([]);
-    const [meta_input, setMeta_input] = useState({});
-    const [metaFiledId, setMetaFiledId] = useState(1);
     const [specificationFiledId, setSpecificationFiledId] = useState(1);
     const [selectedShops, setSelectedShops] = useState([]);
     const [quantities, setQuantities] = useState({});
@@ -111,33 +108,6 @@ const AddProduct = () => {
     const handleSpecificationFields = (id) => {
         setSpecificationFiledId(specificationFiledId + 1);
         setSpecificationFiled((prevState) => [...prevState, specificationFiledId]);
-    };
-
-    const handleMetaFields = (id) => {
-        setMetaFiledId(metaFiledId + 1);
-        setMetaFiled((prevState) => [...prevState, metaFiledId]);
-    };
-
-    const handleMetaInput = (e, id) => {
-        setMeta_input((prevState) => ({
-            ...prevState,
-            [id]: {
-                ...prevState[id],
-                [e.target.name]: e.target.value,
-            },
-        }));
-    };
-
-    const handleMetaFieldRemove = (id) => {
-        setMetaFiled((oldValues) =>
-            oldValues.filter((metaFiled) => metaFiled !== id)
-        );
-        setMeta_input((current) => {
-            const copy = { ...current };
-            delete copy[id];
-            return copy;
-        });
-        setMetaFiledId(metaFiledId - 1);
     };
 
     const handleAttributeFieldsRemove = (id) => {
@@ -338,7 +308,7 @@ const AddProduct = () => {
             ...input,
             shop_quantities: shop_quantities,
             stock: totalStock,
-            shop_ids: shopIds,
+            shop_ids: shopIds
         };
 
         axios
@@ -380,10 +350,9 @@ const AddProduct = () => {
     useEffect(() => {
         setInput((prevState) => ({
             ...prevState,
-            specifications: specification_input,
-            meta: meta_input
+            specifications: specification_input
         }));
-    }, [specification_input, meta_input]);
+    }, [specification_input]);
 
     const handleMulipleSelect = (e) => {
         let value = [];
@@ -1043,89 +1012,69 @@ const AddProduct = () => {
                                 <div className="col-md-12">
                                     <div className="card my-4">
                                         <div className="card-header">
-                                            <h5>Product SEO friendly Info</h5>
+                                            <h5>Product SEO Friendly Info</h5>
                                         </div>
                                         <div className="card-body">
-                                            {metaFiled.map((id, ind) => (
-                                                <div
-                                                    key={ind}
-                                                    className="row my-2 align-items-baseline"
-                                                >
-                                                    <div className="col-md-5">
-                                                        <label className={"w-100 mt-4"}>
-                                                            <p>Mata Name</p>
-                                                            <input
-                                                                className={"form-control mt-2"}
-                                                                type={"text"}
-                                                                name={"name"}
-                                                                value={
-                                                                    meta_input[id] != undefined
-                                                                        ? meta_input[id].name
-                                                                        : null
-                                                                }
-                                                                onChange={(e) =>
-                                                                    handleMetaInput(e, id)
-                                                                }
-                                                                placeholder={"Enter Product Meta Name"}
-                                                            />
-                                                            <p className={"login-error-msg"}>
-                                                                <small>
-                                                                    {errors.name != undefined
-                                                                        ? errors.name[0]
-                                                                        : null}
-                                                                </small>
-                                                            </p>
-                                                        </label>
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <label className={"w-100 mt-4"}>
-                                                            <p>Mata Content</p>
-                                                            <input
-                                                                className="form-control mt-2"
-                                                                type={"text"}
-                                                                name={"content"}
-                                                                value={
-                                                                    meta_input[id] != undefined
-                                                                        ? meta_input[id].value
-                                                                        : null
-                                                                }
-                                                                onChange={(e) =>
-                                                                    handleMetaInput(e, id)
-                                                                }
-                                                                placeholder={"Enter Product Meta Content"}
-                                                            />
-                                                            <p className={"login-error-msg"}>
-                                                                <small>
-                                                                    {errors.name != undefined
-                                                                        ? errors.name[0]
-                                                                        : null}
-                                                                </small>
-                                                            </p>
-                                                        </label>
-                                                    </div>
-                                                    <div className="col-md-1">
-                                                        {metaFiled.length - 1 == ind ? (
-                                                            <button
-                                                                className={"btn btn-danger"}
-                                                                onClick={() =>
-                                                                    handleMetaFieldRemove(id)
-                                                                }
-                                                            >
-                                                                <i className="fa-solid fa-minus" />
-                                                            </button>
-                                                        ) : null}
-                                                    </div>
-                                                </div>
-                                            ))}
-
                                             <div className="row">
-                                                <div className="col-md-12 text-center">
-                                                    <button
-                                                        className={"btn btn-success"}
-                                                        onClick={handleMetaFields}
-                                                    >
-                                                        <i className="fa-solid fa-plus" />
-                                                    </button>
+                                                <div className="col-md-6">
+                                                    <label className={"w-100 mt-4"}>
+                                                        <p>Mata Title</p>
+                                                        <input
+                                                            className={"form-control mt-2"}
+                                                            type="text"
+                                                            name="meta_title"
+                                                            value={input.meta_title}
+                                                            onChange={handleInput}
+                                                            placeholder={"Enter Product Meta Title"}
+                                                        />
+                                                        <p className={"login-error-msg"}>
+                                                            <small>
+                                                                {errors.meta_title != undefined
+                                                                    ? errors.meta_title[0]
+                                                                    : null}
+                                                            </small>
+                                                        </p>
+                                                    </label>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className={"w-100 mt-4"}>
+                                                        <p>Mata Keyword</p>
+                                                        <input
+                                                            className={"form-control mt-2"}
+                                                            type="text"
+                                                            name="meta_keywords"
+                                                            value={input.meta_keywords}
+                                                            onChange={handleInput}
+                                                            placeholder={"Enter Product Meta Keyword"}
+                                                        />
+                                                        <p className={"login-error-msg"}>
+                                                            <small>
+                                                                {errors.meta_keywords != undefined
+                                                                    ? errors.meta_keywords[0]
+                                                                    : null}
+                                                            </small>
+                                                        </p>
+                                                    </label>
+                                                </div>
+                                                <div className="col-md-12">
+                                                    <label className={"w-100 mt-4"}>
+                                                        <p>Mata Description</p>
+                                                        <input
+                                                            className={"form-control mt-2"}
+                                                            type="text"
+                                                            name="meta_description"
+                                                            value={input.meta_description}
+                                                            onChange={handleInput}
+                                                            placeholder={"Enter Product Meta Description"}
+                                                        />
+                                                        <p className={"login-error-msg"}>
+                                                            <small>
+                                                                {errors.meta_description != undefined
+                                                                    ? errors.meta_description[0]
+                                                                    : null}
+                                                            </small>
+                                                        </p>
+                                                    </label>
                                                 </div>
                                             </div>
                                         </div>

@@ -14,6 +14,7 @@ const ProductEdit = () => {
     const params = useParams();
     const [attribute_input, setAttribute_input] = useState({});
     const [specification_input, setSpecification_input] = useState([{ name: '', value: '' }]);
+
     const [errors, setErrors] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [categories, setCategories] = useState([]);
@@ -49,6 +50,7 @@ const ProductEdit = () => {
     };
 
     const handleAttributeShopQuantityChange = (attributeId, shopId, quantity) => {
+        
         setAttributeField((prevState) =>
             prevState.map((attr) =>
                 attr.id === attributeId
@@ -79,12 +81,13 @@ const ProductEdit = () => {
         newSpecifications[index][field] = value;
         setSpecification_input(newSpecifications);
     };
+
     const getProduct = () => {
         const token = localStorage.getItem("token");
         const config = {
             method: "get",
             maxBodyLength: Infinity,
-            url: `${Constants.BASE_URL}/product/${params.id}`,
+            url: `${Constants.BASE_URL}/products/${params.id}`,
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -93,80 +96,93 @@ const ProductEdit = () => {
         axios
             .request(config)
             .then((response) => {
-                const costValue = response.data.data.cost.replace(/[৳,]/g, "");
-                const priceValue = response.data.data.price.replace(/[৳,]/g, "");
-                const shopData = response.data.data.shops;
-
-                const transformedSpecifications = response.data.data.specifications.map(spec => ({
+                const data = response.data.data;
+                
+                // Transform specifications
+                const transformedSpecifications = data.specifications?.map(spec => ({
                     value: spec.value,
                     name: spec.name,
-                }));
+                })) || [];
 
-                setSpecificationFiled(transformedSpecifications || []);
-                setSpecification_input(transformedSpecifications || []);
+                setSpecificationFiled(transformedSpecifications);
+                setSpecification_input(transformedSpecifications);
 
-                setAttributeField(response.data.data.attributes.map(attr => ({
+                // Transform attributes
+                setAttributeField(data.attributes?.map(attr => ({
                     ...attr,
                     shop_quantities: attr.shop_quantities || []
-                })));
+                })) || []);
 
+                // Get shop data from inventory
+                const shopData = data.inventory?.stock_by_location || [];
                 const uniqueShopData = [];
                 const shopIds = new Set();
 
                 shopData.forEach((shop) => {
                     if (!shopIds.has(shop.shop_id)) {
-                        uniqueShopData.push(shop);
+                        uniqueShopData.push({
+                            shop_id: shop.shop_id,
+                            shop_name: shop.shop_name,
+                            shop_quantity: shop.quantity
+                        });
                         shopIds.add(shop.shop_id);
                     }
                 });
 
-                const discountPercentValue = parseFloat(response.data.data.discount_percent);
-                const discountFixedValue = parseFloat(response.data.data.discount_fixed);
-                const discountEndDate = response.data.data.discount_end ? new Date(response.data.data.discount_end) : null;
-                const formattedDiscountEnd = discountEndDate ? discountEndDate.toISOString().slice(0, 16) : null;
-                const discountStartDate = response.data.data.discount_start ? new Date(response.data.data.discount_start) : null;
+                // Extract discount dates
+                const discountStartDate = data.pricing?.discount?.start_date ? new Date(data.pricing.discount.start_date) : null;
                 const formattedDiscountStart = discountStartDate ? discountStartDate.toISOString().slice(0, 16) : null;
+                const discountEndDate = data.pricing?.discount?.end_date ? new Date(data.pricing.discount.end_date) : null;
+                const formattedDiscountEnd = discountEndDate ? discountEndDate.toISOString().slice(0, 16) : null;
 
-                const productAttributes = response.data.data.attributes ? [response.data.data.attributes] : [];
-
+                // Build shop quantities object
                 const shopQuantities = {};
                 uniqueShopData.forEach((shop) => {
                     shopQuantities[shop.shop_id] = shop.shop_quantity;
                 });
+
+                // Get discount values
+                const discountType = data.pricing?.discount?.type || 'percentage';
+                const discountValue = data.pricing?.discount?.value || 0;
+
                 setInput({
-                    attributes: response.data.data.attributes,
+                    attributes: data.attributes || [],
                     shops: uniqueShopData,
-                    name: response.data.data.name,
-                    slug: response.data.data.slug,
-                    category_id: response.data.data.category?.id,
-                    sub_category_id: response.data.data.sub_category?.id,
-                    child_sub_category_id: response.data.data.child_sub_category?.id,
-                    country_id: response.data.data.country?.id,
-                    brand_id: response.data.data.brand?.id,
-                    supplier_id: response.data.data.supplier?.id,
-                    description: response.data.data.description,
-                    cost: costValue ? Number(costValue) : null,
-                    price: priceValue ? Number(priceValue) : null,
-                    isFeatured: response.data.data.isFeatured === 1 ? true : false,
-                    isNew: response.data.data.isNew === 1 ? true : false,
-                    isTrending: response.data.data.isTrending === 1 ? true : false,
-                    sku: response.data.data.sku,
+                    name: data.name,
+                    slug: data.slug,
+                    category_id: data.category?.id,
+                    sub_category_id: data.sub_category?.id,
+                    child_sub_category_id: data.child_sub_category?.id,
+                    country_id: data.country_of_origin?.id,
+                    brand_id: data.brand?.id,
+                    supplier_id: data.supplier?.id,
+                    description: data.description,
+                    cost: data.pricing?.cost_price || 0,
+                    price: data.pricing?.regular_price || 0,
+                    isFeatured: data.badges?.is_featured === true,
+                    isNew: data.badges?.is_new === true,
+                    isTrending: data.badges?.is_trending === true,
+                    sku: data.sku,
                     discount_start: formattedDiscountStart,
                     discount_end: formattedDiscountEnd,
-                    discount_fixed: discountFixedValue,
-                    discount_percent: discountPercentValue,
-                    price_formula: response.data.data.price_formula,
-                    field_limit: response.data.data.field_limit,
-                    status: response.data.data.status == "Active" ? 1 : 0,
+                    discount_fixed: discountType === 'fixed' ? discountValue : 0,
+                    discount_percent: discountType === 'percentage' ? discountValue : 0,
+                    price_formula: data.price_formula,
+                    field_limit: data.field_limit,
+                    status: data.status === "active" ? 1 : 0,
+                    meta_title: data.seo?.meta_title,
+                    meta_keywords: Array.isArray(data.seo?.meta_keywords) ? data.seo.meta_keywords.join(', ') : '',
+                    meta_description: data.seo?.meta_description,
                 });
-                setAttributes(productAttributes);
+                
+                setAttributes(data.attributes ? [data.attributes] : []);
                 setQuantities(shopQuantities);
                 setSelectedShops(uniqueShopData.map((shop) => ({
                     value: shop.shop_id,
                     label: shop.shop_name,
                     quantity: shop.shop_quantity
                 })));
-                setAttributeField(response.data.data.attributes);
+                setAttributeField(data.attributes || []);
             })
             .catch((error) => {
                 console.error(error);
@@ -261,7 +277,7 @@ const ProductEdit = () => {
 
     const handleAttributeInput = (e, id, attributeName, index) => {
         const { name, value } = e.target;
-        console.log("handleAttributeInput called with id:", id, "name:", name, "value:", value, "attributeName:", attributeName, "index:", index);
+        // console.log("handleAttributeInput called with id:", id, "name:", name, "value:", value, "attributeName:", attributeName, "index:", index);
 
         setAttribute_input((prevState) => ({
             ...prevState,
@@ -294,16 +310,18 @@ const ProductEdit = () => {
 
     useEffect(() => {
         console.log("Input state updated with attributes:", input.attributes);
+
     }, [input]);
-    useEffect(() => {
-        console.log("Attribute input changed:", attribute_input); // Add this line
-        setInput((prevState) => ({ ...prevState, attributes: attribute_input }));
-    }, [attribute_input]);
+
+    // useEffect(() => {
+    //     console.log("Attribute input changed:", attribute_input); // Add this line
+    //     setInput((prevState) => ({ ...prevState, attributes: attribute_input }));
+    // }, [attribute_input]);
 
     // Add additional logging to ensure the input state is updated correctly
-    useEffect(() => {
-        console.log("Input state updated with attributes:", input.attributes);
-    }, [input]);
+    // useEffect(() => {
+    //     console.log("Input state updated with attributes:", input.attributes);
+    // }, [input]);
 
 
     useEffect(() => {
@@ -321,6 +339,7 @@ const ProductEdit = () => {
                 },
             })
             .then((res) => {
+                // console.log(res);
                 setCategories(res.data.categories);
                 setBrands(res.data.brands);
                 setCountries(res.data.countries);
@@ -394,6 +413,7 @@ const ProductEdit = () => {
 
     // Update handleQuantityChange to set quantities
     const handleQuantityChange = (event, shopId) => {
+        console.log(shopId);
         const newQuantities = { ...quantities };
         newQuantities[shopId] = parseInt(event.target.value, 10) || 0;
         setQuantities(newQuantities);
@@ -448,7 +468,7 @@ const ProductEdit = () => {
             stock: totalStock,
             shop_ids: shopIds,
             attributes: [...attributeEntries, ...deletedAttributes],
-            specifications: specification_input,
+            specifications: specification_input
         };
         console.log(payload);
     
@@ -491,11 +511,9 @@ const ProductEdit = () => {
     useEffect(() => {
         setInput((prevState) => ({
             ...prevState,
-            specifications: specification_input,
+            specifications: specification_input
         }));
     }, [specification_input]);
-
-    console.log(specification_input);
 
     const handleMulipleSelect = (e) => {
         let value = [];
@@ -628,9 +646,6 @@ const ProductEdit = () => {
         });
     };
 
-
-
-
     return (
         <>
             <Breadcrumb title={"Edit Product"} />
@@ -663,12 +678,13 @@ const ProductEdit = () => {
                                     <div className="col-md-6" key={shop.value}>
                                         <label className="w-100 mt-4">
                                             <p>Product Stock for {shop.label}</p>
+                                           
                                             <input
                                                 className="form-control mt-2"
                                                 type="number"
-                                                name={`shop_quantity_${shop.shop_id}`}
-                                                value={shop.quantity || ''}
-                                                onChange={(e) => handleQuantityChange(e, shop.value,e.target.value)}
+                                                name={`shop_quantity_${shop.value}`}
+                                                value={shop.quantity}
+                                                onChange={(e) => handleQuantityChange(e, shop.value)}
                                                 placeholder={`Enter Product Stock for ${shop.label}`}
                                             />
                                         </label>
@@ -1110,16 +1126,12 @@ const ProductEdit = () => {
                                         </div>
                                     </div>
                                 </div>
-
-
-
                                 <div className="col-md-12">
                                     <div className="card my-4">
                                         <div className="card-header">
                                             <h5>Product Specifications</h5>
                                         </div>
                                         <div className="card-body">
-
                                             <div>
                                                 {specification_input.map((spec, index) => (
                                                     <div key={index} className="specification-field d-flex align-items-center mb-2">
@@ -1142,12 +1154,7 @@ const ProductEdit = () => {
                                                         </button>
                                                     </div>
                                                 ))}
-                                                {/* <button type="button" onClick={handleSpecificationFields}>Add Specification</button> */}
                                             </div>
-
-                                            {/* <button onClick={handleSpecificationFields}>Add Specification</button> */}
-
-
                                             <div className="row">
                                                 <div className="col-md-12 text-center">
                                                     <button
@@ -1156,6 +1163,78 @@ const ProductEdit = () => {
                                                     >
                                                         <i className="fa-solid fa-plus" />
                                                     </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-12">
+                                    <div className="card my-4">
+                                        <div className="card-header">
+                                            <h5>Product SEO Friendly Info</h5>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="row">
+                                                <div className="col-md-6">
+                                                    <label className={"w-100 mt-4"}>
+                                                        <p>Mata Title</p>
+                                                        <input
+                                                            className={"form-control mt-2"}
+                                                            type="text"
+                                                            name="meta_title"
+                                                            value={input.meta_title}
+                                                            onChange={handleInput}
+                                                            placeholder={"Enter Product Meta Title"}
+                                                        />
+                                                        <p className={"login-error-msg"}>
+                                                            <small>
+                                                                {errors.name != undefined
+                                                                    ? errors.name[0]
+                                                                    : null}
+                                                            </small>
+                                                        </p>
+                                                    </label>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className={"w-100 mt-4"}>
+                                                        <p>Mata Keyword</p>
+                                                        <input
+                                                            className={"form-control mt-2"}
+                                                            type="text"
+                                                            name="meta_keywords"
+                                                            value={input.meta_keywords}
+                                                            onChange={handleInput}
+                                                            placeholder={"Enter Product Meta Keyword"}
+                                                        />
+                                                        <p className={"login-error-msg"}>
+                                                            <small>
+                                                                {errors.name != undefined
+                                                                    ? errors.name[0]
+                                                                    : null}
+                                                            </small>
+                                                        </p>
+                                                    </label>
+                                                </div>
+                                                <div className="col-md-12">
+                                                    <label className={"w-100 mt-4"}>
+                                                        <p>Mata Description</p>
+                                                        <input
+                                                            className={"form-control mt-2"}
+                                                            type="text"
+                                                            name="meta_description"
+                                                            value={input.meta_description}
+                                                            onChange={handleInput}
+                                                            placeholder={"Enter Product Meta Description"}
+                                                        />
+                                                        <p className={"login-error-msg"}>
+                                                            <small>
+                                                                {errors.name != undefined
+                                                                    ? errors.name[0]
+                                                                    : null}
+                                                            </small>
+                                                        </p>
+                                                    </label>
                                                 </div>
                                             </div>
                                         </div>

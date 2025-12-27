@@ -13,7 +13,7 @@ const OrderDetails = () => {
   const params = useParams();
   const [order, setOrder] = useState();
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTaxType, setSelectedTaxType] = useState("General (7.5%)");
+  const [selectedTaxType, setSelectedTaxType] = useState(0);
 
   const getOrderDetails = () => {
     setIsLoading(true);
@@ -25,6 +25,7 @@ const OrderDetails = () => {
         },
       })
       .then((res) => {
+        console.log(res);
         setOrder(res.data.data);
         setIsLoading(false);
       });
@@ -37,6 +38,8 @@ const OrderDetails = () => {
   const handleTaxTypeChange = (event) => {
     setSelectedTaxType(event.target.value);
   };
+
+  console.log(selectedTaxType);
 
   const printInvoice = () => {
     const printWindow = window.open("", "_blank");
@@ -96,7 +99,7 @@ const OrderDetails = () => {
             <div className="tax-type-dropdown text-center my-3">
                 <label>Select Tax Type:</label>
                 <select value={selectedTaxType} onChange={handleTaxTypeChange} className="mx-2">
-                  <option selected>Select Vat %</option>
+                  <option value="0" selected>Select Vat %</option>
                   <option value="0.050">Retail Vat (5.0%)</option>
                   <option value="0.075">Supply Vat (7.5%)</option>
                   <option value="0.000">Vat Exempt (0.0%)</option>
