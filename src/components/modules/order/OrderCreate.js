@@ -8,7 +8,6 @@ import CardHeader from "../../partoals/miniComponents/CardHeader";
 import AddCustomer from "../../partoals/modals/AddCustomer";
 import ShowOrderConfirmation from "../../partoals/modals/ShowOrderConfirmation";
 import Modal from "react-bootstrap/Modal";
-import { type } from "@testing-library/user-event/dist/type";
 
 const OrderCreate = () => {
   const navigate = useNavigate();
@@ -216,7 +215,7 @@ const OrderCreate = () => {
         product.attributesId === attributesId
       ) {
         let quantity = product.quantity;
-        if (increaseOrDecrise == "inc") quantity = quantity + 1;
+        if (increaseOrDecrise === "inc") quantity = quantity + 1;
         else quantity = quantity - 1;
         return { ...product, quantity: quantity };
       }
@@ -540,7 +539,7 @@ const OrderCreate = () => {
                             }}
                           >
                             <option>Select Arrtibute</option>
-                            {typeof productWithAttributes.attributes !=
+                            {typeof productWithAttributes.attributes !==
                               "undefined" &&
                               productWithAttributes?.attributes.map(
                                 (attr, ind) => {

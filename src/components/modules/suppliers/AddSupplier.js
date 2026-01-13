@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, redirect, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Breadcrumb from "../../partoals/Breadcrumb";
 import Constants from "../../../Constants";
@@ -15,29 +15,31 @@ const AddSupplier = () => {
     const [districts, setDistricts] = useState([]);
     const [areas, setAreas] = useState([]);
 
-    const getDivisions = () => {
+    const getDivisions = React.useCallback(() => {
         axios.get(`${Constants.BASE_URL}/divisions`).then(res => {
                 setDivisions(res.data)
             })
-    }
-    const getDistrict = (division_id) => {
+    }, [])
+
+    const getDistrict = React.useCallback((division_id) => {
         axios.get(`${Constants.BASE_URL}/district/${division_id}`).then(res => {
                 setDistricts(res.data)
             })
-    }
-    const getAreas = (district_id) => {
+    }, [])
+
+    const getAreas = React.useCallback((district_id) => {
         axios.get(`${Constants.BASE_URL}/area/${district_id}`).then(res => {
                 setAreas(res.data)
             })
-    }
+    }, [])
 
     const handleInput = (e) => {
-        if (e.target.name == 'division_id') {
+        if (e.target.name === 'division_id') {
             setDistricts([])
             setAreas([])
             let division_id = parseInt(e.target.value)
             if(!isNaN(division_id))getDistrict(division_id)
-        }else if(e.target.name == 'district_id'){
+        }else if(e.target.name === 'district_id'){
             setAreas([])
             let district_id = e.target.value
             if(!isNaN(district_id))getAreas(e.target.value)
@@ -94,7 +96,7 @@ const handleSupplierCreate = () => {
 
     useEffect(() => {
         getDivisions()
-    }, []);
+    }, [getDivisions]);
 
     return (
         <>
@@ -123,7 +125,7 @@ const handleSupplierCreate = () => {
                                                     <p>Company Name</p>
                                                     <input
                                                         className={
-                                                            errors.name != undefined
+                                                            errors.name !== undefined
                                                                 ? "form-control mt-2 is-invalid"
                                                                 : "form-control mt-2"
                                                         }
@@ -135,7 +137,7 @@ const handleSupplierCreate = () => {
                                                     />
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.name != undefined
+                                                            {errors.name !== undefined
                                                                 ? errors.name[0]
                                                                 : null}
                                                         </small>
@@ -147,7 +149,7 @@ const handleSupplierCreate = () => {
                                                     <p>Phone</p>
                                                     <input
                                                         className={
-                                                            errors.phone != undefined
+                                                            errors.phone !== undefined
                                                                 ? "form-control mt-2 is-invalid"
                                                                 : "form-control mt-2"
                                                         }
@@ -159,7 +161,7 @@ const handleSupplierCreate = () => {
                                                     />
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.phone != undefined
+                                                            {errors.phone !== undefined
                                                                 ? errors.phone[0]
                                                                 : null}
                                                         </small>
@@ -171,7 +173,7 @@ const handleSupplierCreate = () => {
                                                     <p>Email Address</p>
                                                     <input
                                                         className={
-                                                            errors.email != undefined
+                                                            errors.email !== undefined
                                                                 ? "form-control mt-2 is-invalid"
                                                                 : "form-control mt-2"
                                                         }
@@ -183,7 +185,7 @@ const handleSupplierCreate = () => {
                                                     />
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.email != undefined
+                                                            {errors.email !== undefined
                                                                 ? errors.email[0]
                                                                 : null}
                                                         </small>
@@ -195,7 +197,7 @@ const handleSupplierCreate = () => {
                                                     <p>Status</p>
                                                     <select
                                                         className={
-                                                            errors.status != undefined
+                                                            errors.status !== undefined
                                                                 ? "form-select mt-2 is-invalid"
                                                                 : "form-select mt-2"
                                                         }
@@ -208,7 +210,7 @@ const handleSupplierCreate = () => {
                                                     </select>
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.status != undefined
+                                                            {errors.status !== undefined
                                                                 ? errors.status[0]
                                                                 : null}
                                                         </small>
@@ -220,7 +222,7 @@ const handleSupplierCreate = () => {
                                                     <p>Details</p>
                                                     <textarea
                                                         className={
-                                                            errors.details != undefined
+                                                            errors.details !== undefined
                                                                 ? "form-control mt-2 is-invalid"
                                                                 : "form-control mt-2"
                                                         }
@@ -231,7 +233,7 @@ const handleSupplierCreate = () => {
                                                     ></textarea>
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.details != undefined
+                                                            {errors.details !== undefined
                                                                 ? errors.details[0]
                                                                 : null}
                                                         </small>
@@ -243,7 +245,7 @@ const handleSupplierCreate = () => {
                                                     <p>Logo</p>
                                                     <input
                                                         className={
-                                                            errors.logo != undefined
+                                                            errors.logo !== undefined
                                                                 ? "form-control mt-2 is-invalid"
                                                                 : "form-control mt-2"
                                                         }
@@ -254,11 +256,11 @@ const handleSupplierCreate = () => {
                                                     />
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.logo != undefined ? errors.logo[0] : null}
+                                                            {errors.logo !== undefined ? errors.logo[0] : null}
                                                         </small>
                                                     </p>
                                                 </label>
-                                                {input.logo != undefined ? (
+                                                {input.logo !== undefined ? (
                                                     <div className="row">
                                                         <div className="col-6">
                                                             <div className="logo-preview mt-3">
@@ -288,7 +290,7 @@ const handleSupplierCreate = () => {
                                                     </p>
                                                     <input
                                                         className={
-                                                            errors.address != undefined
+                                                            errors.address !== undefined
                                                                 ? "form-control mt-2 is-invalid"
                                                                 : "form-control mt-2"
                                                         }
@@ -300,7 +302,7 @@ const handleSupplierCreate = () => {
                                                     />
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.address != undefined
+                                                            {errors.address !== undefined
                                                                 ? errors.address[0]
                                                                 : null}
                                                         </small>
@@ -312,7 +314,7 @@ const handleSupplierCreate = () => {
                                                     <p>Select Division</p>
                                                     <select
                                                         className={
-                                                            errors.division_id != undefined
+                                                            errors.division_id !== undefined
                                                                 ? "form-select mt-2 is-invalid"
                                                                 : "form-select mt-2"
                                                         }
@@ -327,7 +329,7 @@ const handleSupplierCreate = () => {
                                                     </select>
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.division_id != undefined
+                                                            {errors.division_id !== undefined
                                                                 ? errors.division_id[0]
                                                                 : null}
                                                         </small>
@@ -339,7 +341,7 @@ const handleSupplierCreate = () => {
                                                     <p>Select City</p>
                                                     <select
                                                         className={
-                                                            errors.district_id != undefined
+                                                            errors.district_id !== undefined
                                                                 ? "form-select mt-2 is-invalid"
                                                                 : "form-select mt-2"
                                                         }
@@ -355,7 +357,7 @@ const handleSupplierCreate = () => {
                                                     </select>
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.district_id != undefined
+                                                            {errors.district_id !== undefined
                                                                 ? errors.district_id[0]
                                                                 : null}
                                                         </small>
@@ -367,7 +369,7 @@ const handleSupplierCreate = () => {
                                                     <p>Select Area</p>
                                                     <select
                                                         className={
-                                                            errors.area_id != undefined
+                                                            errors.area_id !== undefined
                                                                 ? "form-select mt-2 is-invalid"
                                                                 : "form-select mt-2"
                                                         }
@@ -383,7 +385,7 @@ const handleSupplierCreate = () => {
                                                     </select>
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.area_id != undefined
+                                                            {errors.area_id !== undefined
                                                                 ? errors.area_id[0]
                                                                 : null}
                                                         </small>
@@ -398,7 +400,7 @@ const handleSupplierCreate = () => {
                                                     </p>
                                                     <input
                                                         className={
-                                                            errors.landmark != undefined
+                                                            errors.landmark !== undefined
                                                                 ? "form-control mt-2 is-invalid"
                                                                 : "form-control mt-2"
                                                         }
@@ -410,7 +412,7 @@ const handleSupplierCreate = () => {
                                                     />
                                                     <p className={"login-error-msg"}>
                                                         <small>
-                                                            {errors.landmark != undefined
+                                                            {errors.landmark !== undefined
                                                                 ? errors.landmark[0]
                                                                 : null}
                                                         </small>

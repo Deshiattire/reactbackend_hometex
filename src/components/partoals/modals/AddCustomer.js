@@ -59,7 +59,7 @@ const AddCustomer = ({ setModalShow, ...props }) => {
             <p>Name</p>
             <input
               className={
-                errors.name != undefined
+                errors.name !== undefined
                   ? "form-control mt-2 is-invalid"
                   : "form-control mt-2"
               }
@@ -70,7 +70,7 @@ const AddCustomer = ({ setModalShow, ...props }) => {
               placeholder={"Enter Customer name"}
             />
             <p className={"login-error-msg"}>
-              <small>{errors.name != undefined ? errors.name[0] : null}</small>
+              <small>{errors.name !== undefined ? errors.name[0] : null}</small>
             </p>
           </label>
         </div>
@@ -79,7 +79,7 @@ const AddCustomer = ({ setModalShow, ...props }) => {
             <p>Phone</p>
             <input
               className={
-                errors.phone != undefined
+                errors.phone !== undefined
                   ? "form-control mt-2 is-invalid"
                   : "form-control mt-2"
               }
@@ -91,7 +91,7 @@ const AddCustomer = ({ setModalShow, ...props }) => {
             />
             <p className={"login-error-msg"}>
               <small>
-                {errors.phone != undefined ? errors.phone[0] : null}
+                {errors.phone !== undefined ? errors.phone[0] : null}
               </small>
             </p>
           </label>
@@ -101,7 +101,7 @@ const AddCustomer = ({ setModalShow, ...props }) => {
             <p>Email</p>
             <input
               className={
-                errors.email != undefined
+                errors.email !== undefined
                   ? "form-control mt-2 is-invalid"
                   : "form-control mt-2"
               }
@@ -113,7 +113,7 @@ const AddCustomer = ({ setModalShow, ...props }) => {
             />
             <p className={"login-error-msg"}>
               <small>
-                {errors.email != undefined ? errors.email[0] : null}
+                {errors.email !== undefined ? errors.email[0] : null}
               </small>
             </p>
           </label>

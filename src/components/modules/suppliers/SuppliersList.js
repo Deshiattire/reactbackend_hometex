@@ -41,7 +41,7 @@ function SuppliersList() {
 
     const token = localStorage.getItem('token');
 
-    const getSuppliers = (pageNumber = 1) => {
+    const getSuppliers = React.useCallback((pageNumber = 1) => {
       setIsLoading(true);
       axios
         .get(`${Constants.BASE_URL}/supplier?page=${pageNumber}&search=${input.search}&order_by=${input.order_by}&per_page=${input.per_page}&direction=${input.direction}`, {
@@ -57,7 +57,7 @@ function SuppliersList() {
           setActivePage(res.data.meta.current_page);
           setIsLoading(false);
         });
-    };
+    }, [input.search, input.order_by, input.per_page, input.direction, token]);
     
     const handlePhotoModal = (photo) => {
         setModalPhoto(photo);
@@ -101,7 +101,7 @@ function SuppliersList() {
 
     useEffect(() => {
         getSuppliers();
-    }, []);
+    }, [getSuppliers]);
 
     return (
         <>

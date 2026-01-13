@@ -218,7 +218,7 @@ export default function SideBar() {
                 </div>
                 <div className="sb-sidenav-footer bg-theme text-silver">
                     <div className="small">Logged in as:</div>
-                    {localStorage.name != undefined ? localStorage.name : null}
+                    {localStorage.name !== undefined ? localStorage.name : null}
                 </div>
             </nav>
         </div>

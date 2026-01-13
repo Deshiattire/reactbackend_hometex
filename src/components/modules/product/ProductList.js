@@ -8,7 +8,6 @@ import Swal from "sweetalert2";
 import Constants from "../../../Constants";
 import Loader from "../../partoals/miniComponents/Loader";
 import NoDataFound from "../../partoals/miniComponents/NoDataFound";
-import ProductTransferForm from "./transferProduct/ProductTransferForm";
 
 const ProductList = () => {
   const [input, setInput] = useState({
@@ -19,10 +18,11 @@ const ProductList = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState([]);
-  const [paginateLink, setPaginateLink] = useState([]);
   const [startFrom, setStartFrom] = useState(1);
   const [productColumns, setProductColumns] = useState([]);
-  const [duplicateMessage, setDuplicateMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const handleInput = (e) => {
     setInput((prevState) => ({
@@ -31,37 +31,65 @@ const ProductList = () => {
     }));
   };
 
-  const getProducts = (paginate = null) => {
-    setIsLoading(true);
-    const token = localStorage.getItem("token");
+  const handleLoadMore = () => {
+    const nextPage = currentPage + 1;
+    getProducts(nextPage, true);
+  };
 
-    const searchParam = input.search ? `&search=${input.search}` : '';
-    let url = `${Constants.BASE_URL}/products?page=1${searchParam}&order_by=${input.order_by}&direction=${input.direction}&paginate=yes`;
-    if(paginate !== null){
-      url = `${paginate}${searchParam}&order_by=${input.order_by}&direction=${input.direction}&paginate=yes`
+  const getProducts = React.useCallback((pageNumber = 1, isLoadMore = false) => {
+    if (isLoadMore) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+      setCurrentPage(1);
+      setHasMoreProducts(true);
     }
+    
+    const token = localStorage.getItem("token");
+    const searchParam = input.search ? `&search=${input.search}` : "";
+    const url = `${Constants.BASE_URL}/products?page=${pageNumber}&paginate=yes&order_by=${input.order_by}&direction=${input.direction}${searchParam}`;
 
     axios
-      .get(
-        url,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
+      .get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((res) => {
-        setPaginateLink(res.data.meta);
-        setProducts(Array.isArray(res.data.data?.products) ? res.data.data.products : []);
+        const newProducts = Array.isArray(res.data.data?.products) 
+          ? res.data.data.products.filter(p => p && p.id) 
+          : [];
+        const meta = res.data.meta;
+        
+        if (isLoadMore) {
+          setProducts((prevProducts) => {
+            const existingIds = new Set(prevProducts.map(p => String(p.id)));
+            const uniqueNewProducts = newProducts.filter(p => p && p.id && !existingIds.has(String(p.id)));
+            return [...prevProducts, ...uniqueNewProducts];
+          });
+        } else {
+          setProducts(newProducts);
+          setStartFrom(meta?.from || 1);
+        }
+        
+        if (meta?.current_page >= meta?.last_page || newProducts.length === 0) {
+          setHasMoreProducts(false);
+        } else {
+          setHasMoreProducts(true);
+        }
+        
+        setCurrentPage(meta?.current_page || pageNumber);
         setIsLoading(false);
+        setIsLoadingMore(false);
       })
       .catch((error) => {
         console.log(error);
-        // handle error here, e.g. set an error state or display an error message
+        setIsLoading(false);
+        setIsLoadingMore(false);
       });
-  };
+  }, [input.search, input.order_by, input.direction]);
 
-  const getProductColumns = () => {
+  const getProductColumns = React.useCallback(() => {
     const token = localStorage.getItem("token");
     axios
       .get(`${Constants.BASE_URL}/get-product-columns`, {
@@ -76,7 +104,7 @@ const ProductList = () => {
         console.log(error);
         // handle error here, e.g. set an error state or display an error message
       });
-  };
+  }, []);
   const handleDuplicateProduct = (id) => {
     const token = localStorage.getItem("token");
 
@@ -91,7 +119,6 @@ const ProductList = () => {
         }
       )
       .then((response) => {
-        setDuplicateMessage(response.data.msg);
         getProducts();
         Swal.fire({
           position: "top-end",
@@ -103,7 +130,6 @@ const ProductList = () => {
         });
       })
       .catch((error) => {
-        setDuplicateMessage("Error duplicating product: " + error.message);
         Swal.fire({
           position: "top-end",
           title: error.message,
@@ -150,7 +176,7 @@ const ProductList = () => {
   useEffect(() => {
     getProducts();
     getProductColumns();
-  }, []);
+  }, [getProducts, getProductColumns]);
 
   const handleGenerateBarcode = (product) => {
     navigate(`/generate-bar-code`, { state: { productSKU: product } });
@@ -231,7 +257,7 @@ const ProductList = () => {
                       onClick={() => getProducts()}
                       className={"btn theme-button"}
                     >
-                      <i className="fa-solid fa-magnifying-glass"></i>
+                      <span><i className="fa-solid fa-magnifying-glass"></i></span>
                       Search
                     </button>
                   </div>
@@ -261,9 +287,9 @@ const ProductList = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {Object.keys(products).length > 0 ? (
+                      {products.length > 0 ? (
                         products.map((product, number) => (
-                          <tr key={number}>
+                          <tr key={String(product.id)}>
                             <td>{startFrom + number}</td>
                             <td>
                               <p className={"text-theme"}>
@@ -272,20 +298,20 @@ const ProductList = () => {
                               <p className={"text-success"}>
                                 Slug: {product.slug}
                               </p>
-                              <p className={"text-success"}>
+                              <div className={"text-success"}>
                                 {product.attributes !== undefined &&
                                 Object.keys(product.attributes).length > 0
                                   ? product.attributes.map(
                                       (attribute, index) => (
-                                        <p>
+                                        <div key={`${product.id}-attr-${index}`}>
                                           <small>
                                             {attribute.name}: {attribute.value}
                                           </small>
-                                        </p>
+                                        </div>
                                       )
                                     )
                                   : null}
-                              </p>
+                              </div>
                             </td>
                             <td>
                               <p className={"text-theme"}>
@@ -401,7 +427,7 @@ const ProductList = () => {
                                     handleDuplicateProduct(product.id)
                                   }
                                 >
-                                  <i class="fa-solid fa-clone"></i>
+                                  <span><i className="fa-solid fa-clone"></i></span>
                                 </button>
                                 <button
                                   className={"btn btn-sm btn-outline-dark"}
@@ -418,11 +444,24 @@ const ProductList = () => {
                       )}
                     </tbody>
                   </table>
-                  <div>
-                    { paginateLink?.links?.map((item) => (
-                        <button onClick={() => getProducts(item?.url)} disabled={item?.active} dangerouslySetInnerHTML={{ __html: item.label }} />
-                    ))}
-                  </div>
+                  {hasMoreProducts && !isLoading && (
+                    <div className="text-center mt-4">
+                      <button
+                        onClick={handleLoadMore}
+                        disabled={isLoadingMore}
+                        className="btn btn-primary"
+                      >
+                        <span style={{ display: isLoadingMore ? "inline-block" : "none" }}>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          Loading...
+                        </span>
+                        <span style={{ display: !isLoadingMore ? "inline-block" : "none" }}>
+                          <span><i className="fa-solid fa-chevron-down me-2"></i></span>
+                          Load More
+                        </span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -10,7 +10,7 @@ const ShowOrderConfirmation = ({handleOrderPlace, handleOrderSummaryInput, ...pr
 
 
     useEffect(()=>{
-        if(localStorage.branch != undefined){
+        if(localStorage.branch !== undefined){
           setBranch(JSON.parse(localStorage.branch))
       
         }
@@ -125,7 +125,7 @@ const ShowOrderConfirmation = ({handleOrderPlace, handleOrderSummaryInput, ...pr
                         </select>
                           </th>
                         </tr>
-                        {props.order_summary.payment_method_id != 1 ? 
+                        {props.order_summary.payment_method_id !== 1 ? 
                         <tr>
                         <th colSpan={4} className='text-end text-theme'>Transaction ID</th>
                         <td className={'align-middle'} style={{ width:'160px' }}>

@@ -39,7 +39,7 @@ const SubcategoryList = () => {
         }));
     };
 
-    const getSubCategories = (pageNumber = 1) => {
+    const getSubCategories = React.useCallback((pageNumber = 1) => {
         const token = localStorage.getItem('token');
         const config = {
             method: 'get',
@@ -66,7 +66,7 @@ const SubcategoryList = () => {
                 console.error(error);
                 setIsLoading(false);
             });
-    };
+    }, [input.search, input.order_by, input.per_page, input.direction]);
     
 
     const handlePhotoModal = (photo) => {
@@ -111,7 +111,7 @@ const SubcategoryList = () => {
 
     useEffect(() => {
         getSubCategories();
-    }, []);
+    }, [getSubCategories]);
   return (
     <>
             <Breadcrumb title={"Sub Category List"} />

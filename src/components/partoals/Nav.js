@@ -74,7 +74,6 @@ export default function Nav() {
         onClick={handleSidebar}
         className="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0"
         id="sidebarToggle"
-        href="#!"
       >
         <i className="fas fa-bars"></i>
       </button>
@@ -106,7 +105,7 @@ export default function Nav() {
           <a
             className="nav-link dropdown-toggle"
             id="navbarDropdown"
-            href="#"
+            href="#!"
             role="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"

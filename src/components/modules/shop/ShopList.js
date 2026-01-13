@@ -39,7 +39,7 @@ const handleInput = (e) => {
     }));
 };
 
-const getShops = (pageNumber = 1) => {
+const getShops = React.useCallback((pageNumber = 1) => {
     const token = localStorage.getItem('token');
     setIsLoading(true);
     axios
@@ -56,7 +56,7 @@ const getShops = (pageNumber = 1) => {
             setActivePage(res.data.meta.current_page);
             setIsLoading(false);
         });
-};
+}, [input.search, input.order_by, input.per_page, input.direction]);
 
 
 const handlePhotoModal = (photo) => {
@@ -111,7 +111,7 @@ const handleShopDelete = (id) => {
 
 useEffect(() => {
     getShops();
-}, []);
+}, [getShops]);
   return (
     <>
     <Breadcrumb title={"shops List"} />

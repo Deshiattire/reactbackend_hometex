@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, redirect, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from 'axios';
 import Breadcrumb from "../../partoals/Breadcrumb";
 import Constants from "../../../Constants";
@@ -13,10 +13,9 @@ const SubCategoryEdit = () => {
   const [input, setInput] = useState({ status: 1 })
   const [errors, setErrors] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  const [category, setCategory] = useState([])
   const [categories, setCategories] = useState([])
 
-  const getCategories = () => {
+  const getCategories = React.useCallback(() => {
     const token = localStorage.getItem('token');
     axios.get(`${Constants.BASE_URL}/get-category-list`, {
       headers: {
@@ -25,19 +24,19 @@ const SubCategoryEdit = () => {
     }).then(res => {
       setCategories(res.data);
     });
-}
+  }, []);
 
-const getSubCategory = () =>{
-  const token = localStorage.getItem('token');
-  axios.get(`${Constants.BASE_URL}/sub-category/${params.id}`, {
+  const getSubCategory = React.useCallback(() => {
+    const token = localStorage.getItem('token');
+    axios.get(`${Constants.BASE_URL}/sub-category/${params.id}`, {
       headers: {
-          'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`
       }
-  }).then(res=>{
-    console.log(res?.data?.data);
+    }).then(res => {
+      console.log(res?.data?.data);
       setInput(res?.data?.data)
-  })
-}
+    })
+  }, [params.id]);
 
 
   const handleInput = (e) => {
@@ -88,10 +87,10 @@ const getSubCategory = () =>{
   }
 
 
-  useEffect(()=>{
+  useEffect(() => {
     getCategories()
     getSubCategory()
-  }, [])
+  }, [getCategories, getSubCategory])
 
   return (
     <>
@@ -113,7 +112,7 @@ const getSubCategory = () =>{
                   <label className="w-100 mt-4">
                     <p>Select Category</p>
                     <select
-                      className={errors.category_id != undefined ? 'form-select mt-2 is-invalid' : 'form-select mt-2'}
+                      className={errors.category_id !== undefined ? 'form-select mt-2 is-invalid' : 'form-select mt-2'}
                       name={'category_id'}
                       value={input.category_id}
                       onChange={handleInput}
@@ -124,56 +123,56 @@ const getSubCategory = () =>{
                         <option key={index} value={category.id}>{category.name}</option>
                         ))}
                     </select>
-                    <p className={'login-error-msg'}><small>{errors.category_id != undefined ? errors.category_id[0] : null}</small></p>
+                    <p className={'login-error-msg'}><small>{errors.category_id !== undefined ? errors.category_id[0] : null}</small></p>
                   </label>
                 </div>
                 <div className="col-md-6">
                   <label className="w-100 mt-4">
                     <p>Name</p>
                     <input
-                      className={errors.name != undefined ? 'form-control mt-2 is-invalid' : 'form-control mt-2'}
+                      className={errors.name !== undefined ? 'form-control mt-2 is-invalid' : 'form-control mt-2'}
                       type={'text'}
                       name={'name'}
                       value={input.name}
                       onChange={handleInput}
                       placeholder={'Enter sub category Name'}
                     />
-                    <p className={'login-error-msg'}><small>{errors.name != undefined ? errors.name[0] : null}</small></p>
+                    <p className={'login-error-msg'}><small>{errors.name !== undefined ? errors.name[0] : null}</small></p>
                   </label>
                 </div>
                 <div className="col-md-6">
                   <label className="w-100 mt-4">
                     <p>Slug</p>
                     <input
-                      className={errors.slug != undefined ? 'form-control mt-2 is-invalid' : 'form-control mt-2'}
+                      className={errors.slug !== undefined ? 'form-control mt-2 is-invalid' : 'form-control mt-2'}
                       type={'text'}
                       name={'slug'}
                       value={input.slug}
                       onChange={handleInput}
                       placeholder={'Enter Sub category slug'}
                     />
-                    <p className={'login-error-msg'}><small>{errors.slug != undefined ? errors.slug[0] : null}</small></p>
+                    <p className={'login-error-msg'}><small>{errors.slug !== undefined ? errors.slug[0] : null}</small></p>
                   </label>
                 </div>
                 <div className="col-md-6">
                   <label className="w-100 mt-4">
                     <p>Serial</p>
                     <input
-                      className={errors.serial != undefined ? 'form-control mt-2 is-invalid' : 'form-control mt-2'}
+                      className={errors.serial !== undefined ? 'form-control mt-2 is-invalid' : 'form-control mt-2'}
                       type={'number'}
                       name={'serial'}
                       value={input.serial}
                       onChange={handleInput}
                       placeholder={'Enter Sub category serial'}
                     />
-                    <p className={'login-error-msg'}><small>{errors.serial != undefined ? errors.serial[0] : null}</small></p>
+                    <p className={'login-error-msg'}><small>{errors.serial !== undefined ? errors.serial[0] : null}</small></p>
                   </label>
                 </div>
                 <div className="col-md-6">
                   <label className="w-100 mt-4">
                     <p>Status</p>
                     <select
-                      className={errors.status != undefined ? 'form-select mt-2 is-invalid' : 'form-select mt-2'}
+                      className={errors.status !== undefined ? 'form-select mt-2 is-invalid' : 'form-select mt-2'}
                       name={'status'}
                       value={input.status}
                       onChange={handleInput}
@@ -181,40 +180,40 @@ const getSubCategory = () =>{
                       <option value={1}>Active</option>
                       <option value={0}>Inactive</option>
                     </select>
-                    <p className={'login-error-msg'}><small>{errors.status != undefined ? errors.status[0] : null}</small></p>
+                    <p className={'login-error-msg'}><small>{errors.status !== undefined ? errors.status[0] : null}</small></p>
                   </label>
                 </div>
                 <div className="col-md-6">
                   <label className="w-100 mt-4">
                     <p>Description</p>
                     <textarea
-                      className={errors.serial != undefined ? 'form-control mt-2 is-invalid' : 'form-control mt-2'}
+                      className={errors.serial !== undefined ? 'form-control mt-2 is-invalid' : 'form-control mt-2'}
                       name={'description'}
                       value={input.description}
                       onChange={handleInput}
                       placeholder={'Enter Sub category description'}
                     ></textarea>
-                    <p className={'login-error-msg'}><small>{errors.description != undefined ? errors.description[0] : null}</small></p>
+                    <p className={'login-error-msg'}><small>{errors.description !== undefined ? errors.description[0] : null}</small></p>
                   </label>
                 </div>
                 <div className="col-md-6">
                   <label className="w-100 mt-4">
                     <p>Photo</p>
                     <input
-                      className={errors.photo != undefined ? 'form-control mt-2 is-invalid' : 'form-control mt-2'}
+                      className={errors.photo !== undefined ? 'form-control mt-2 is-invalid' : 'form-control mt-2'}
                       type={'file'}
                       name={'photo'}
                       onChange={handlePhoto}
                       placeholder={'Enter sub category photo'}
                     />
-                    <p className={'login-error-msg'}><small>{errors.photo != undefined ? errors.photo[0] : null}</small></p>
+                    <p className={'login-error-msg'}><small>{errors.photo !== undefined ? errors.photo[0] : null}</small></p>
                   </label>
                   {
-                    input.photo != undefined || input.photo_preview != undefined ?
+                    input.photo !== undefined || input.photo_preview !== undefined ?
                       <div className="row">
                         <div className="col-6">
                           <div className="photo-preview mt-3">
-                            <img alt={"Hometex sub Category"} src={input.photo == undefined ? input.photo_preview: input.photo} className={'img-thumbnail aspect-one'} />
+                            <img alt={"Hometex sub Category"} src={input.photo === undefined ? input.photo_preview: input.photo} className={'img-thumbnail aspect-one'} />
                           </div>
                         </div>
                       </div> : null
