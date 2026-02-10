@@ -72,7 +72,7 @@ const ShippingTab = ({ data, onSave, isSaving, errors = {} }) => {
                     <div className="card bg-light">
                         <div className="card-body">
                             <h6 className="mb-3">
-                                <i className="fas fa-shipping-fast me-2"></i>
+                                <span className="fas fa-shipping-fast me-2"></span>
                                 Shipping Options
                             </h6>
                             <div className="row">
@@ -87,7 +87,7 @@ const ShippingTab = ({ data, onSave, isSaving, errors = {} }) => {
                                         />
                                         <label className="form-check-label" htmlFor="free_shipping">
                                             <strong>
-                                                <i className="fas fa-truck text-success me-1"></i>
+                                                <span className="fas fa-truck text-success me-1"></span>
                                                 Free Shipping
                                             </strong>
                                             <br />
@@ -106,7 +106,7 @@ const ShippingTab = ({ data, onSave, isSaving, errors = {} }) => {
                                         />
                                         <label className="form-check-label" htmlFor="express_available">
                                             <strong>
-                                                <i className="fas fa-bolt text-warning me-1"></i>
+                                                <span className="fas fa-bolt text-warning me-1"></span>
                                                 Express Shipping Available
                                             </strong>
                                             <br />
@@ -141,7 +141,7 @@ const ShippingTab = ({ data, onSave, isSaving, errors = {} }) => {
 
                 <div className="col-md-12 mb-2">
                     <h6>
-                        <i className="fas fa-ruler-combined me-2"></i>
+                        <span className="fas fa-ruler-combined me-2"></span>
                         Dimensions (cm)
                     </h6>
                 </div>
@@ -199,7 +199,7 @@ const ShippingTab = ({ data, onSave, isSaving, errors = {} }) => {
                     <div className="card border-info">
                         <div className="card-body">
                             <h6 className="card-title">
-                                <i className="fas fa-box me-2"></i>
+                                <span className="fas fa-box me-2"></span>
                                 Package Summary
                             </h6>
                             <div className="row text-center">
@@ -263,7 +263,7 @@ const ShippingTab = ({ data, onSave, isSaving, errors = {} }) => {
                             </>
                         ) : (
                             <>
-                                <i className="fas fa-save me-2"></i>
+                                <span className="fas fa-save me-2"></span>
                                 Save Shipping Info
                             </>
                         )}

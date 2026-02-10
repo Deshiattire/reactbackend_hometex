@@ -65,11 +65,11 @@ const SpecificationsTab = ({ data, onSave, isSaving, errors = {} }) => {
             return;
         }
 
-        // Build payload - API expects: specifications: [{ key: string, value: string }]
+        // Build payload - API expects: specifications: [{ name: string, value: string }]
         const specsPayload = specifications
             .filter(spec => spec.key.trim() && spec.value.trim())
             .map(spec => ({
-                key: spec.key.trim(),
+                name: spec.key.trim(),
                 value: spec.value.trim(),
             }));
 
@@ -109,7 +109,7 @@ const SpecificationsTab = ({ data, onSave, isSaving, errors = {} }) => {
                     <div className="card bg-light">
                         <div className="card-body">
                             <h6 className="mb-3">
-                                <i className="fas fa-magic me-2"></i>
+                                <span className="fas fa-magic me-2"></span>
                                 Quick Add Common Specifications
                             </h6>
                             <div className="d-flex flex-wrap gap-2">
@@ -121,7 +121,7 @@ const SpecificationsTab = ({ data, onSave, isSaving, errors = {} }) => {
                                         onClick={() => addFromTemplate(spec.key)}
                                         disabled={specifications.some(s => s.key.toLowerCase() === spec.key.toLowerCase())}
                                     >
-                                        <i className="fas fa-plus me-1"></i>
+                                        <span className="fas fa-plus me-1"></span>
                                         {spec.key}
                                     </button>
                                 ))}
@@ -135,7 +135,7 @@ const SpecificationsTab = ({ data, onSave, isSaving, errors = {} }) => {
                     <div className="card">
                         <div className="card-header d-flex justify-content-between align-items-center">
                             <h6 className="mb-0">
-                                <i className="fas fa-list me-2"></i>
+                                <span className="fas fa-list me-2"></span>
                                 Product Specifications
                             </h6>
                             <span className="badge bg-info">
@@ -238,7 +238,7 @@ const SpecificationsTab = ({ data, onSave, isSaving, errors = {} }) => {
                 <div className="col-md-12 mt-4">
                     <div className="alert alert-info">
                         <h6>
-                            <i className="fas fa-lightbulb me-2"></i>
+                            <span className="fas fa-lightbulb me-2"></span>
                             Tips for Specifications
                         </h6>
                         <ul className="mb-0 small">
@@ -260,7 +260,7 @@ const SpecificationsTab = ({ data, onSave, isSaving, errors = {} }) => {
                             </>
                         ) : (
                             <>
-                                <i className="fas fa-save me-2"></i>
+                                <span className="fas fa-save me-2"></span>
                                 Save Specifications
                             </>
                         )}
