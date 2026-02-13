@@ -3,14 +3,15 @@ import axios from 'axios';
 import Constants from '../../../Constants';
 
 export default function Login() {
-    const[input, setInput] = useState({user_type: 2})
-    const[errors, setErrors] = useState([])
+    const[input, setInput] = useState({ user_type: 2, email: '', password: '' })
+    const[errors, setErrors] = useState({})
     const[isLoading, setIsLoading] = useState(false)
 
 
     const handleInput = (e) => setInput(prevState => ({...prevState, [e.target.name] : e.target.value}))
        
     const handleLogin = () => {
+        setErrors({})
         setIsLoading(true)
         axios.post(`${Constants.BASE_URL}/login`, input).then(res=>{
             localStorage.email = res.data.email
@@ -23,13 +24,27 @@ export default function Login() {
             localStorage.branch = JSON.stringify(res.data.branch)
             setIsLoading(false)
             window.location.reload()
-        }).catch(errors =>
-            {
-                setIsLoading(false)
-                if(errors.response.status === 422 ){
-                    setErrors(errors.response.data.errors)
-                }
+        }).catch((error) => {
+            setIsLoading(false)
+
+            const status = error?.response?.status
+            if (status === 422) {
+                setErrors(error?.response?.data?.errors || {})
+                return
+            }
+
+            if (status === 401) {
+                setErrors({
+                    general: ['Invalid email/phone or password.']
+                })
+                return
+            }
+
+            // Handle network/server-unreachable cases where Axios has no response object.
+            setErrors({
+                general: ["Unable to reach the server. Please try again."]
             })
+        })
     }
 
    
@@ -52,7 +67,7 @@ export default function Login() {
                 value={input.email} 
                 onChange={handleInput} 
                 />
-            <p className={'login-error-msg'}><small>{errors.email != undefined ? errors.email[0]: null}</small></p>
+            <p className={'login-error-msg'}><small>{errors?.email?.[0] || null}</small></p>
             </label>
             <label className={'w-100 mt-4'}>
                 <p>Password</p>
@@ -63,12 +78,12 @@ export default function Login() {
                 value={input.password} 
                 onChange={handleInput} 
                 />
-            <p className={'login-error-msg'}><small>{errors.user_type != undefined ? errors.password[0]: null}</small></p>
+            <p className={'login-error-msg'}><small>{errors?.password?.[0] || null}</small></p>
             </label>
             <label className={'w-100 mt-4'}>
                 <p>Login As</p>
                 <select 
-                className={errors.user_type != undefined ? 'is-invalid form-control mt-2' : 'form-select mt-2'}
+                className={errors?.user_type?.[0] ? 'is-invalid form-control mt-2' : 'form-select mt-2'}
                 name={'user_type'} 
                 value={input.user_type} 
                 onChange={handleInput} 
@@ -77,11 +92,14 @@ export default function Login() {
                     <option value={1} >Admin</option>
                     <option value={2} >Admin Manager</option>
                 </select>
-            <p className={'login-error-msg'}><small>{errors.user_type != undefined ? errors.user_type[0]: null}</small></p>
+            <p className={'login-error-msg'}><small>{errors?.user_type?.[0] || null}</small></p>
             </label>
             <div className="d-grid mt-4">
-                <button onClick={handleLogin} className={'brn btn-outline-warning'} 
-                dangerouslySetInnerHTML={{ __html: isLoading ? '<span className="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Login...':'Login' }} />
+                <button onClick={handleLogin} className={'brn btn-outline-warning'} disabled={isLoading}>
+                    {isLoading && <span className="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true"></span>}
+                    {isLoading ? 'Login...' : 'Login'}
+                </button>
+                <p className={'login-error-msg mt-2'}><small>{errors?.general?.[0] || null}</small></p>
             </div>
         </div>
 
